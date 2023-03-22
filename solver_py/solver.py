@@ -34,12 +34,9 @@ def dump_json_data(matrix_Z,matrix_S,matrix_Y):
 
     solver_matrices_dict = {}
     
-    for matrix in matrix_Z.tolist():
-        solver_matrices_dict["matrix_Z"] = json.dumps(matrix, default=encode_complex) 
-    for matrix in matrix_S.tolist():
-        solver_matrices_dict["matrix_S"] = json.dumps(matrix, default=encode_complex) 
-    for matrix in matrix_Y.tolist():
-        solver_matrices_dict["matrix_Y"] = json.dumps(matrix, default=encode_complex) 
+    solver_matrices_dict["matrix_Z"] = json.dumps(matrix_Z.tolist(), default=encode_complex)
+    solver_matrices_dict["matrix_S"] = json.dumps(matrix_S.tolist(), default=encode_complex)
+    solver_matrices_dict["matrix_Y"] = json.dumps(matrix_Y.tolist(), default=encode_complex) 
 
     print(solver_matrices_dict)
     
