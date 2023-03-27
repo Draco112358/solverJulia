@@ -1,3 +1,6 @@
+include("lp_compute.jl")
+include("solver_function.jl")
+using JSON
 
 function encode_complex(z)
     if z isa Complex
@@ -7,58 +10,44 @@ function encode_complex(z)
     end
 end
        
-function dump_json_data(matrix_Z, matrix_S, matrix_Y)
-    solver_matrices_dict = Dict(
-        "matrix_Z" => 
-    )
-end
-
-def dump_json_data(matrix_Z,matrix_S,matrix_Y):
-
-    
-    assert(isinstance(matrix_Z, np.ndarray))
-    assert(isinstance(matrix_S, np.ndarray))
-    assert(isinstance(matrix_Y, np.ndarray))
-
+function dump_json_data(matrix_Z,matrix_S,matrix_Y)
 
     solver_matrices_dict = {}
     
-    solver_matrices_dict["matrix_Z"] = json.dumps(matrix_Z.tolist(), default=encode_complex)
-    solver_matrices_dict["matrix_S"] = json.dumps(matrix_S.tolist(), default=encode_complex)
-    solver_matrices_dict["matrix_Y"] = json.dumps(matrix_Y.tolist(), default=encode_complex) 
+    solver_matrices_dict["matrix_Z"] = JSON.json(matrix_Z)
+    solver_matrices_dict["matrix_S"] = JSON.json(matrix_S)
+    solver_matrices_dict["matrix_Y"] = JSON.json(matrix_Y) 
 
     print(solver_matrices_dict)
     
     return solver_matrices_dict
+end
         
       
 struct signal
     value
 end
 
-class signal:
-    def __init__(self, dict_element):
-
-        
-        self.value = complex(float(dict_element['Re']),float(dict_element['Im']))
-        assert type(self.value)==complex
+Base.@kwdef struct signal
+    dict_element
+    value = complex(float(dict_element['Re']),float(dict_element['Im']))
 
         
         
-struct geom_attributes
+Base.@kwdef struct geom_attributes
     dict_element
     radius = dict_element["radius"]
     segments = dict_element["segments"]
 end
         
-struct transf_params
+Base.@kwdef struct transf_params
     dict_element
     position = dict_element["position"]
     rotation = dict_element["rotation"]  
     scale = dict_element["scale"]   
 end
 
-struct element
+Base.@kwdef struct element
     dict_element
     name = dict_element["name"]
     type = dict_element["type"]
@@ -69,7 +58,7 @@ end
         
             
         
-struct port
+Base.@kwdef struct port
     dict_element
     name = dict_element["name"]
     type = dict_element["type"]
@@ -80,58 +69,54 @@ struct port
 end
 
         
-class lumped_element:
-    def __init__(self, dict_element):
-        self.name = dict_element['name']
-        self.type = dict_element['type']
-        self.value = dict_element['value']
+Base.@kwdef struct lumped_element
+    dict_element
+    name = dict_element["name"]
+    type = dict_element["type"]
+    value = dict_element["value"]
+    inputElement = element(dict_element["inputElement"])
+    outputElement = element(dict_element["outputElement"])
+    rlcParams = dict_element["rlcParams"]
+    isSelected = dict_element["isSelected"]
+end
 
-        self.inputElement = element(dict_element['inputElement'])
-        assert type(self.inputElement)==element
-        self.outputElement = element(dict_element['outputElement'])
-        assert type(self.outputElement)==element
-        self.rlcParams = dict_element['rlcParams']
-        self.isSelected = dict_element['isSelected']
-
-class material:
-    def __init__(self, dict_element):
-        self.name = dict_element['name']
-        self.color = dict_element['color']
-        self.permeability = dict_element['permeability']
-        self.tangent_delta_permeability = dict_element['tangent_delta_permeability']
-        self.custom_permeability = dict_element['custom_permeability']
-        assert len(self.custom_permeability)==2
-        self.permittivity = dict_element['permittivity']
-        self.tangent_delta_permittivity = dict_element['tangent_delta_permittivity']
-        self.custom_permittivity = dict_element['custom_permittivity']
-        assert len(self.custom_permittivity)==2
-        self.conductivity = dict_element['conductivity']
-        self.tangent_delta_conductivity = dict_element['tangent_delta_conductivity']
-        self.custom_conductivity = dict_element['custom_conductivity']
-        assert len(self.custom_conductivity)==2
-        self.epsr = None
-        self.Rx = None
-        self.Ry = None
-        self.Rz = None
-        self.Cx = None
-        self.Cy = None
-        self.Cz = None
+Base.@kwdef struct material
+    dict_element
+    name = dict_element["name"]
+    color = dict_element["color"]
+    permeability = dict_element["permeability"]
+    tangent_delta_permeability = dict_element["tangent_delta_permeability"]
+    custom_permeability = dict_element["custom_permeability"]
+    permittivity = dict_element["permittivity"]
+    tangent_delta_permittivity = dict_element["tangent_delta_permittivity"]
+    custom_permittivity = dict_element["custom_permittivity"]
+    conductivity = dict_element["conductivity"]
+    tangent_delta_conductivity = dict_element["tangent_delta_conductivity"]
+    custom_conductivity = dict_element["custom_conductivity"]
+    epsr = None
+    Rx = None
+    Ry = None
+    Rz = None
+    Cx = None
+    Cy = None
+    Cz = None
+end
         
-class port_def:
-    def __init__(self, inp_pos, out_pos, voxels, nodes):
-        self.port_start = inp_pos
-        self.port_end = out_pos
-        self.port_voxels = voxels
-        self.port_nodes = nodes
+struct port_def
+    port_start
+    port_end
+    port_voxels
+    port_nodes
+end
 
-class le_def:
-    def __init__(self, val, typ, inp_pos, out_pos, voxels, nodes):
-        self.value = val
-        self.type = typ
-        self.le_start = inp_pos
-        self.le_end = out_pos
-        self.le_voxels = voxels
-        self.le_nodes = nodes
+struct le_def
+    value
+    type
+    le_start
+    le_end
+    le_voxels
+    le_nodes
+end
 
 # class LPWorker(Thread):
 #     def __init__(self, queue):
@@ -148,7 +133,7 @@ class le_def:
 #                 self.queue.task_done()
                 
 
-function read_ports(inputData:Dict):
+function read_ports(inputData::Dict)
     
     @assert inputData isa Dict
     ports = inputData["ports"]
@@ -178,13 +163,13 @@ function read_ports(inputData:Dict):
         opos[1, 3] = port_object.outputElement.transformationParams.position[3]*1e-3
         push!(output_positions, opos)
     @assert length(input_positions)==N_PORTS && length(output_positions)==N_PORTS
-    ports_out = port_def(inp_pos=np.stack([i for i in input_positions]), out_pos=np.stack([i for i in output_positions]),voxels=np.zeros((N_PORTS, 2), dtype='int64'), nodes=np.zeros((N_PORTS, 2), dtype='int64'))
+    ports_out = port_def(inp_pos=np.stack([i for i in input_positions]), out_pos=np.stack([i for i in output_positions]),voxels=zeros(Int64, (N_PORTS, 2)), nodes=zeros(Int64,(N_PORTS, 2)))
     end
     return ports_out
 end
 
 
-def read_lumped_elements(inputData::Dict):
+function read_lumped_elements(inputData::Dict)
     
     @assert inputData isa Dict
     
@@ -219,7 +204,7 @@ def read_lumped_elements(inputData::Dict):
             
             ltype = zeros(Int64, 1)
             ltype[1] = lumped_element_object.type
-            types.append(ltype)
+            push!(types, ltype)
         end
     end
             
@@ -228,10 +213,8 @@ def read_lumped_elements(inputData::Dict):
         lumped_elements_out = le_def(val=np.stack([i for i in values]),typ=np.stack([i for i in types]),inp_pos=np.stack([i for i in input_positions]), out_pos=np.stack([i for i in output_positions]), \
                                     voxels=zeros(Int64, (N_LUMPED_ELEMENTS, 2)), nodes=zeros(Int64, (N_LUMPED_ELEMENTS, 2)))
 
-
-
-
     return lumped_elements_out
+end
 
 function read_materials(inputData::Dict):
     @assert inputData isa Dict
@@ -278,11 +261,6 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams):
 
     grids = np.stack([mesherDict['mesher_matrices'][i] for i in mesherDict['mesher_matrices']])
 
-    assert Nx == grids[0].shape[0]
-    assert Ny == grids[0].shape[1]
-    assert Nz == grids[0].shape[2]
-    
-
     frequencies = inputDict['frequencies']
     
     n_freq = length(frequencies)
@@ -307,9 +285,9 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams):
     
     #TODO: hardcoded stuff
     
-    inner_Iter = solverAlgoParams['innerIteration']
-    outer_Iter = solverAlgoParams['outerIteration']
-    tol = solverAlgoParams['convergenceThreshold']*ones((n_freq))
+    inner_Iter = solverAlgoParams["innerIteration"]
+    outer_Iter = solverAlgoParams["outerIteration"]
+    tol = solverAlgoParams["convergenceThreshold"]*ones((n_freq))
     ind_low_freq= filter(i -> !iszero(frequencies[i]), findall(frequencies<1e5, frequencies))
     tol[ind_low_freq] = 1e-7
     
@@ -398,7 +376,7 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams):
     Lp_x_mat, Lp_y_mat, Lp_z_mat = compute_Lps(bars_Lp_x, bars_Lp_y, bars_Lp_z, sx, sy, sz) 
     # print("Time for computing Lp with julia:", round(time.perf_counter_ns() / 1000 - cpu_time,2))
 
-    Z, Y, S=Quasi_static_iterative_solver(freq,A,Gamma,P_mat,Lp_x_mat,
+    Z, Y, S = Quasi_static_iterative_solver(freq,A,Gamma,P_mat,Lp_x_mat,
         Lp_y_mat,Lp_z_mat,diag_R,diag_Cd,ports,lumped_elements,GMRES_settings)
     
     # Z, Y, S = solver_funcs.Quasi_static_direct_solver(freq,A,Gamma,P_mat,Lp_x_mat,\
@@ -406,58 +384,5 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams):
     
     # print("Time for Solver:", round(time.perf_counter_ns() / 1000 - cpu_time,2))
 
-
-    # ------------- PLOTS -----------------------------------------------
-    # plt.figure(1)
-    # plt.plot(freq, Z[0,0,:].real*1e3, label="PEEC - Re Z [mOhm]", linewidth=2)
-    # plt.plot(freq, Z[0,0,:].__abs__()*1e3, label="PEEC - Mag Z [mOhm]", linestyle = 'dotted', linewidth=2)
-    # plt.xlabel('freq')
-    # plt.ylabel('R, Mag [mOhm]')
-    # plt.xscale('log')
-    # # plt.yscale('log')
-    # plt.legend()
-    # plt.draw()
-    
-    # # C = np.zeros((n_freq), dtype="double")
-    # # for cont in range(n_freq):
-    # #     C[cont]=(1/Z[0,0,cont]).imag/(2*mt.pi*freq[cont])*1e9
-    
-    # # plt.figure(2)
-    # # plt.plot(freq, C, label="PEEC C [nF]", linewidth=2)
-    # # plt.xlabel('freq')
-    # # plt.xscale('log')
-    # # plt.ylabel('C [nF]')
-    # # plt.legend()
-    # # plt.draw()
-    
-    # L=np.zeros((n_freq), dtype="double")
-    # for cont in range(n_freq):
-    #     # print("L",cont,freq[cont],(Z[0,0,cont]).imag,mt.pi,(2*mt.pi*freq[cont]),((Z[0,0,cont]).imag/(2*mt.pi*freq[cont]))*1e9)
-        
-    #     L[cont]=((Z[0,0,cont]).imag/(2*mt.pi*freq[cont]))*1e9
-    
-    # plt.figure(3)
-    # plt.plot(freq, L, label="PEEC L [nH]", linewidth=2)
-    # plt.xlabel('freq')
-    # plt.xscale('log')
-    # plt.ylabel('L [nH]')
-    # plt.legend()
-    # plt.draw()
-    
-    # # Angle=np.zeros((n_freq), dtype="double")
-    # # for cont in range(n_freq):
-    # #     Angle[cont]=np.angle(Z[0,0,cont], deg=True)
-    
-    # # plt.figure(4)
-    # # plt.plot(freq, Angle, label="PEEC Angle [rad]", linewidth=2)
-    # # plt.xlabel('freq')
-    # # plt.xscale('log')
-    # # plt.ylabel('Angle [rad]')
-    # # plt.legend()
-    # # plt.draw()
-    
-    # plt.show()
-    # end
-# ------------------------ END PLOTS -------------------------------------------
-    return dump_json_data(matrix_Z=Z,matrix_S=S,matrix_Y=Y) 
+    return dump_json_data(Z,S,Y) 
 end
