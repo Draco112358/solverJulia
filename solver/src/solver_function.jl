@@ -77,8 +77,10 @@ function build_Yle_S(lumped_elements, ports, escalings, n, w, val_chiusura)
         n1 = lumped_elements.le_nodes[c1, 1]
         n2 = lumped_elements.le_nodes[c1, 2]
 
-        ind1 = findall((ind_r == n1 && !iszero), ind_r)
-        ind2 = findall((ind_c == n1 && !iszero), ind_c)
+        ind1 = findall(ind_r == n1 , ind_r)
+        ind1 = filter(i -> !iszero(ind_r[i]), ind1)
+        ind2 = findall(ind_c == n1, ind_c)
+        ind2 = filter(i -> !iszero(ind_c[i]), ind2)
         ind = intersect(ind1, ind2)
 
         if length(ind) == 0
@@ -100,8 +102,10 @@ function build_Yle_S(lumped_elements, ports, escalings, n, w, val_chiusura)
         end
 
 
-        ind1 = findall((ind_r == n2 && !iszero), ind_r)
-        ind2 = findall((ind_c == n2 && !iszero), ind_c)
+        ind1 = findall(ind_r == n2, ind_r)
+        ind1 = filter(i -> !iszero(ind_r[i]), ind1)
+        ind2 = findall(ind_c == n2 , ind_c)
+        ind2 = filter(i -> !iszero(ind_c[i]), ind2)
         #ind1 = ifelse(ind_r == n2, ind_r, n2)
         #ind2 = ifelse(ind_c == n2, ind_c, n2)
         ind = intersect(ind1, ind2)
@@ -123,8 +127,10 @@ function build_Yle_S(lumped_elements, ports, escalings, n, w, val_chiusura)
             end
         end
 
-        ind1 = findall((ind_r == n1 && !iszero), ind_r)
-        ind2 = findall((ind_c == n2 && !iszero), ind_c)
+        ind1 = findall(ind_r == n1, ind_r)
+        ind1 = filter(i -> !iszero(ind_r[i]), ind1)
+        ind2 = findall(ind_c == n2, ind_c)
+        ind2 = filter(i -> !iszero(ind_c[i]), ind2)
         #ind1 = ifelse(ind_r == n1, ind_r, n1)
         #ind2 = ifelse(ind_c == n2, ind_c, n2)
         ind = intersect(ind1, ind2)
@@ -147,8 +153,10 @@ function build_Yle_S(lumped_elements, ports, escalings, n, w, val_chiusura)
             end
         end
 
-        ind2 = findall((ind_r == n2 && !iszero), ind_r)
-        ind1 = findall((ind_c == n1 && !iszero), ind_c)
+        ind2 = findall(ind_r == n2, ind_r)
+        ind2 = filter(i -> !iszero(ind_r[i]), ind2)
+        ind1 = findall(ind_c == n1, ind_c)
+        ind1 = filter(i -> !iszero(ind_c[i]), ind1)
         #ind2 = ifelse(ind_r == n2, ind_r, n2)
         #ind1 = ifelse(ind_c == n1, ind_c, n1)
         ind = intersect(ind1, ind2)
@@ -177,8 +185,10 @@ function build_Yle_S(lumped_elements, ports, escalings, n, w, val_chiusura)
         n1 = ports.port_nodes[c1, 1]
         n2 = ports.port_nodes[c1, 2]
 
-        ind1 = findall((ind_r == n1 && !iszero), ind_r)
-        ind2 = findall((ind_c == n1 && !iszero), ind_c)
+        ind1 = findall(ind_r == n1, ind_r)
+        ind1 = filter(i -> !iszero(ind_r[i]), ind1)
+        ind2 = findall(ind_c == n1, ind_c)
+        ind2 = filter(i -> !iszero(ind_c[i]), ind2)
         #ind1 = ifelse(ind_r == n1, ind_r, n1)
         #ind2 = ifelse(ind_c == n1, ind_c, n1)
 
@@ -193,8 +203,10 @@ function build_Yle_S(lumped_elements, ports, escalings, n, w, val_chiusura)
             vals[ind[1]] = vals[ind[1]] + 1 / val_chiusura
         end
 
-        ind1 = findall((ind_r == n2 && !iszero), ind_r)
-        ind2 = findall((ind_c == n2 && !iszero), ind_c)
+        ind1 = findall(ind_r == n2, ind_r)
+        ind1 = filter(i -> !iszero(ind_r[i]), ind1)
+        ind2 = findall(ind_c == n2, ind_c)
+        ind2 = filter(i -> !iszero(ind_c[i]), ind2)
         #ind1 = ifelse(ind_r == n2, ind_r, n2)
         #ind2 = ifelse(ind_c == n2, ind_c, n2)
         ind = intersect(ind1, ind2)
@@ -208,8 +220,10 @@ function build_Yle_S(lumped_elements, ports, escalings, n, w, val_chiusura)
             vals[ind[1]] = vals[ind[1]] + 1.0 / val_chiusura
         end
 
-        ind1 = findall((ind_r == n1 && !iszero), ind_r)
-        ind2 = findall((ind_c == n2 && !iszero), ind_c)
+        ind1 = findall(ind_r == n1, ind_r)
+        ind1 = filter(i -> !iszero(ind_r[i]), ind1)
+        ind2 = findall(ind_c == n2, ind_c)
+        ind2 = filter(i -> !iszero(ind_c[i]), ind2)
         #ind1 = ifelse(ind_r == n1, ind_r, n1)
         #ind2 = ifelse(ind_c == n2, ind_c, n2)
         ind = intersect(ind1, ind2)
@@ -223,8 +237,10 @@ function build_Yle_S(lumped_elements, ports, escalings, n, w, val_chiusura)
             vals[ind[1]] = vals[ind[1]] - 1.0 / val_chiusura
         end
 
-        ind1 = findall((ind_r == n2 && !iszero), ind_r)
-        ind2 = findall((ind_c == n1 && !iszero), ind_c)
+        ind1 = findall(ind_r == n2, ind_r)
+        ind1 = filter(i -> !iszero(ind_r[i]), ind1)
+        ind2 = findall(ind_c == n1, ind_c)
+        ind2 = filter(i -> !iszero(ind_c[i]), ind2)
         #ind1 = ifelse(ind_r == n2, ind_r, n2)
         #ind2 = ifelse(ind_c == n1, ind_c, n1)
         ind = intersect(ind1, ind2)
@@ -275,8 +291,10 @@ function build_Yle_S_no_scal(lumped_elements, ports, n, w, val_chiusura)
     for c1 in range(1, stop=nlum)
         n1 = lumped_elements.le_nodes[c1, 1]
         n2 = lumped_elements.le_nodes[c1, 2]
-        ind1 = findall((ind_r == n1 && !iszero), ind_r)
-        ind2 = findall((ind_c == n1 && !iszero), ind_c)
+        ind1 = findall(ind_r == n1, ind_r)
+        ind1 = filter(i -> !iszero(ind_r[i]), ind1)
+        ind2 = findall(ind_c == n1, ind_c)
+        ind2 = filter(i -> !iszero(ind_c[i]), ind2)
         #ind1 = ifelse(ind_r == n1, ind_r, n1)
         #ind2 = ifelse(ind_c == n1, ind_c, n1)
         ind = intersect(ind1, ind2)
@@ -297,8 +315,10 @@ function build_Yle_S_no_scal(lumped_elements, ports, n, w, val_chiusura)
             end
         end
 
-        ind1 = findall((ind_r == n2 && !iszero), ind_r)
-        ind2 = findall((ind_c == n2 && !iszero), ind_c)
+        ind1 = findall(ind_r == n2, ind_r)
+        ind1 = filter(i -> !iszero(ind_r[i]), ind1)
+        ind2 = findall(ind_c == n2, ind_c)
+        ind2 = filter(i -> !iszero(ind_c[i]), ind2)
         #ind1 = ifelse(ind_r == n2, ind_r, n2)
         #ind2 = ifelse(ind_c == n2, ind_c, n2)
         ind = intersect(ind1, ind2)
@@ -320,8 +340,10 @@ function build_Yle_S_no_scal(lumped_elements, ports, n, w, val_chiusura)
             end
         end
 
-        ind1 = findall((ind_r == n1 && !iszero), ind_r)
-        ind2 = findall((ind_c == n2 && !iszero), ind_c)
+        ind1 = findall(ind_r == n1, ind_r)
+        ind1 = filter(i -> !iszero(ind_r[i]), ind1)
+        ind2 = findall(ind_c == n2, ind_c)
+        ind2 = filter(i -> !iszero(ind_c[i]), ind2)
         #ind1 = ifelse(ind_r == n1, ind_r, n1)
         #ind2 = ifelse(ind_c == n2, ind_c, n2)
         ind = intersect(ind1, ind2)
@@ -341,8 +363,10 @@ function build_Yle_S_no_scal(lumped_elements, ports, n, w, val_chiusura)
             else
                 vals[ind[1]] = vals[ind[1]] - 1.0 / lumped_elements.value[c1]
             
-        ind2 = findall((ind_r == n2 && !iszero), ind_r)
-        ind1 = findall((ind_c == n1 && !iszero), ind_c)  
+        ind2 = findall(ind_r == n2, ind_r)
+        ind2 = filter(i -> !iszero(ind_r[i]), ind2)
+        ind1 = findall(ind_c == n1, ind_c)  
+        ind1 = filter(i -> !iszero(ind_c[i]), ind1)
         #ind2 = ifelse(ind_r == n2, ind_r, n2)      
         #ind1 = ifelse(ind_c == n1, ind_c, n1)
         ind = intersect(ind1, ind2)
@@ -371,8 +395,10 @@ function build_Yle_S_no_scal(lumped_elements, ports, n, w, val_chiusura)
         n1 = ports.port_nodes[c1, 1]
         n2 = ports.port_nodes[c1, 2]
 
-        ind1 = findall((ind_r == n1 && !iszero), ind_r)
-        ind2 = findall((ind_c == n2 && !iszero), ind_c)
+        ind1 = findall(ind_r == n1, ind_r)
+        ind1 = filter(i -> !iszero(ind_r[i]), ind1)
+        ind2 = findall(ind_c == n2, ind_c)
+        ind2 = filter(i -> !iszero(ind_c[i]), ind2)
         #ind1 = ifelse(ind_r == n1, ind_r, n1)
         #ind2 = ifelse(ind_c == n1, ind_c, n1)
 
@@ -387,8 +413,10 @@ function build_Yle_S_no_scal(lumped_elements, ports, n, w, val_chiusura)
             vals[ind[1]] = vals[ind[1]] + 1 / val_chiusura
         end
 
-        ind1 = findall((ind_r == n2 && !iszero), ind_r)
-        ind2 = findall((ind_c == n2 && !iszero), ind_c)
+        ind1 = findall(ind_r == n2, ind_r)
+        ind1 = filter(i -> !iszero(ind_r[i]), ind1)
+        ind2 = findall(ind_c == n2, ind_c)
+        ind2 = filter(i -> !iszero(ind_c[i]), ind2)
         #ind1 = ifelse(ind_r == n2, ind_r, n2)
         #ind2 = ifelse(ind_c == n2, ind_c, n2)
         ind = intersect(ind1, ind2)
@@ -401,8 +429,10 @@ function build_Yle_S_no_scal(lumped_elements, ports, n, w, val_chiusura)
         else
             vals[ind[1]] = vals[ind[1]] + 1.0 / val_chiusura
         end
-        ind1 = findall((ind_r == n1 && !iszero), ind_r)
-        ind2 = findall((ind_c == n2 && !iszero), ind_c)
+        ind1 = findall(ind_r == n1, ind_r)
+        ind1 = filter(i -> !iszero(ind_r[i]), ind1)
+        ind2 = findall(ind_c == n2, ind_c)
+        ind2 = filter(i -> !iszero(ind_c[i]), ind2)
         #ind1 = ifelse(ind_r == n1, ind_r, n1)
         #ind2 = ifelse(ind_c == n2, ind_c, n2)
         ind = intersect(ind1, ind2)
@@ -415,8 +445,10 @@ function build_Yle_S_no_scal(lumped_elements, ports, n, w, val_chiusura)
         else
             vals[ind[1]] = vals[ind[1]] - 1.0 / val_chiusura
         end
-        ind1 = findall((ind_r == n2 && !iszero), ind_r)
-        ind2 = findall((ind_c == n1 && !iszero), ind_c)
+        ind1 = findall(ind_r == n2, ind_r)
+        ind1 = filter(i -> !iszero(ind_r[i]), ind1)
+        ind2 = findall(ind_c == n1, ind_c)
+        ind2 = filter(i -> !iszero(ind_c[i]), ind2)
         #ind1 = ifelse(ind_r == n2, ind_r, n2)
         #ind2 = ifelse(ind_c == n1, ind_c, n1)
         ind = intersect(ind1, ind2)
@@ -431,16 +463,16 @@ function build_Yle_S_no_scal(lumped_elements, ports, n, w, val_chiusura)
         end
     end
 
-    Yle = sparse(ind_r[0:cont], ind_c[0:cont], vals[0:cont])
+    Yle = sparse(ind_r[1:cont], ind_c[1:cont], vals[1:cont])
 
     return Yle
 end
 
-function precond_3_3_vector(LU_S,invZ,invP,A,Gamma,w,X1,X2,X3)
+function precond_3_3_vector(L, U, p,invZ,invP,A,Gamma,w,X1,X2,X3)
 
-    n1=ifelse(length(X1) > 0, length(X1), 1)
-    n2=ifelse(length(X2) > 0, length(X1), 1)
-    n3=ifelse(length(X3) > 0, length(X1), 1)
+    n1=length(X1)
+    n2=length(X2)
+    n3=length(X3)
 
     i1=range(1, stop=n1)
     i2=range(n1,stop=n1+n2)
@@ -450,31 +482,31 @@ function precond_3_3_vector(LU_S,invZ,invP,A,Gamma,w,X1,X2,X3)
 
 
     #da rivedere
-    M1 = dot(sparse(invZ), X1)
-    #M1 = csc_matrix.dot(invZ, X1)
-    M2 = LU_S.solve(dot(sparse(transpose(A)), M1))
+    M1 = *(invZ, X1)
+    #M1 = csc_matrix.*(invZ, X1)
+    M2 = U\(L\*(transpose(A), M1)[p])
     #M2 = LU_S.solve(csc_matrix.dot(A.transpose(),M1))
-    M3 = dot(sparse(invP), X2)
-    #M3 = csc_matrix.dot(invP,X2)
-    M4 = LU_S.solve(dot(sparse(Gamma), M3))
-    #M4 = LU_S.solve(csc_matrix.dot(Gamma,M3))
-    M5 = LU_S.solve(X3)
+    M3 = *(invP, X2)
+    #M3 = csc_matrix.*(invP,X2)
+    M4 = U\(L\*(Gamma, M3)[p])
+    #M4 = LU_S.solve(csc_matrix.*(Gamma,M3))
+    M5 = U\(L\X3[p])
 
-    Y[np.ix_(i1)] = Y[np.ix_(i1)]+M1-1.0*dot(sparse(invZ),dot(sparse(A), M2))
-    Y[np.ix_(i1)] = Y[np.ix_(i1)]+1j*w*dot(sparse(invZ),dot(sparse(A), M4))
-    Y[np.ix_(i1)] = Y[np.ix_(i1)]-1.0*dot(sparse(invZ),dot(sparse(A), M5))
+    Y[np.ix_(i1)] = Y[np.ix_(i1)]+M1-1.0*(*((invZ),*((A), M2)))
+    Y[np.ix_(i1)] = Y[np.ix_(i1)]+1j*w*(*((invZ),*((A), M4)))
+    Y[np.ix_(i1)] = Y[np.ix_(i1)]-1.0*(*((invZ),*((A), M5)))
 
-    #Y[np.ix_(i1)] = Y[np.ix_(i1)]+M1-1.0*csc_matrix.dot(invZ,csc_matrix.dot(A,M2))
-    #Y[np.ix_(i1)] = Y[np.ix_(i1)]+1j*w*csc_matrix.dot(invZ, csc_matrix.dot(A,M4))
-    #Y[np.ix_(i1)] = Y[np.ix_(i1)]-1.0*csc_matrix.dot(invZ, csc_matrix.dot(A, M5))
+    #Y[np.ix_(i1)] = Y[np.ix_(i1)]+M1-1.0*csc_matrix.*(invZ,csc_matrix.*(A,M2))
+    #Y[np.ix_(i1)] = Y[np.ix_(i1)]+1j*w*csc_matrix.*(invZ, csc_matrix.*(A,M4))
+    #Y[np.ix_(i1)] = Y[np.ix_(i1)]-1.0*csc_matrix.*(invZ, csc_matrix.*(A, M5))
 
-    Y[np.ix_(i2)] = Y[np.ix_(i2)]+dot(sparse(invP),dot(sparse(transpose(Gamma)), M2))
-    Y[np.ix_(i2)] = Y[np.ix_(i2)] + M3 -1j*w*dot(sparse(invP),dot(sparse(transpose(Gamma)), M4))
-    Y[np.ix_(i2)] = Y[np.ix_(i2)]+dot(sparse(invP),dot(sparse(transpose(Gamma)), M5))
+    Y[np.ix_(i2)] = Y[np.ix_(i2)]+(*(invP,*((transpose(Gamma)), M2)))
+    Y[np.ix_(i2)] = Y[np.ix_(i2)] + M3 -1j*w*(*(invP,*(transpose(Gamma), M4)))
+    Y[np.ix_(i2)] = Y[np.ix_(i2)]+(*(invP,*(transpose(Gamma), M5)))
 
-    # Y[np.ix_(i2)] = Y[np.ix_(i2)]+csc_matrix.dot(invP, csc_matrix.dot(Gamma.transpose(), M2))
-    # Y[np.ix_(i2)] = Y[np.ix_(i2)] + M3 -1j*w*csc_matrix.dot(invP, csc_matrix.dot(Gamma.transpose(), M4))
-    # Y[np.ix_(i2)] = Y[np.ix_(i2)]+csc_matrix.dot(invP, csc_matrix.dot(Gamma.transpose(), M5))
+    # Y[np.ix_(i2)] = Y[np.ix_(i2)]+csc_matrix.*(invP, csc_matrix.*(Gamma.transpose(), M2))
+    # Y[np.ix_(i2)] = Y[np.ix_(i2)] + M3 -1j*w*csc_matrix.*(invP, csc_matrix.*(Gamma.transpose(), M4))
+    # Y[np.ix_(i2)] = Y[np.ix_(i2)]+csc_matrix.*(invP, csc_matrix.*(Gamma.transpose(), M5))
 
     Y[np.ix_(i3)] = Y[np.ix_(i3)]+M2
     Y[np.ix_(i3)] = Y[np.ix_(i3)]-1j*w*M4
@@ -487,7 +519,7 @@ function precond_3_3_vector(LU_S,invZ,invP,A,Gamma,w,X1,X2,X3)
     return Y
 end
 
-function precond_3_3_Kt(LU_S, invZ, invP, A,Gamma, n1,n2, X3)
+function precond_3_3_Kt(L, U, p, invZ, invP, A,Gamma, n1,n2, X3)
 
     n3 = length(X3)
 
@@ -497,11 +529,11 @@ function precond_3_3_Kt(LU_S, invZ, invP, A,Gamma, n1,n2, X3)
 
     Y = zeros(Complex, n1 + n2 + n3,1)
 
-    M5 = LU_S.solve(X3)
+    M5 = U\(L\X3[p])
 
-    Y[np.ix_(i1)] = Y[np.ix_(i1)] - 1.0*csc_matrix.dot(invZ, csc_matrix.dot(A, M5))
+    Y[np.ix_(i1)] = Y[np.ix_(i1)] - 1.0*csc_matrix.*(invZ, csc_matrix.*(A, M5))
 
-    Y[np.ix_(i2)] = Y[np.ix_(i2)] + csc_matrix.dot(invP, csc_matrix.dot(Gamma.transpose(), M5))
+    Y[np.ix_(i2)] = Y[np.ix_(i2)] + csc_matrix.*(invP, csc_matrix.*(Gamma.transpose(), M5))
 
     Y[np.ix_(i3)] = Y[np.ix_(i3)] + M5
 
@@ -532,7 +564,7 @@ function s2y(S,Zo)
 end
 
 function ComputeMatrixVector(w,escalings,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,Lp_z_mat,
-                        Z_self,Yle,invZ,invP,LU_S,x)
+                        Z_self,Yle,invZ,invP,L, U, p, x)
 
     mx = size(Lp_x_mat)[1]
     my = size(Lp_y_mat)[1]
@@ -553,16 +585,16 @@ function ComputeMatrixVector(w,escalings,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,Lp_z_ma
     ia2 = range(mx, stop=mx + my)
     ia3 = range(mx + my, stop=mx + my + mz)
 
-    Y1[ia1] = 1j * w * escalings.Lp * dot(Lp_x_mat, I[ia1])
-    Y1[ia2] = 1j * w * escalings.Lp * dot(Lp_y_mat, I[ia2])
-    Y1[ia3] = 1j * w * escalings.Lp * dot(Lp_z_mat, I[ia3])
+    Y1[ia1] = 1j * w * escalings.Lp * *(Lp_x_mat, I[ia1])
+    Y1[ia2] = 1j * w * escalings.Lp * *(Lp_y_mat, I[ia2])
+    Y1[ia3] = 1j * w * escalings.Lp * *(Lp_z_mat, I[ia3])
 
-    Y1=Y1+Z_self.*I+dot(sparse(A), Phi)
+    Y1=Y1+Z_self.*I+*((A), Phi)
 
-    Y2 = escalings.P * np.dot(P_mat,Q) -1.0*dot(sparse(transpose(Gamma)), Phi)
-    Y3 = -1.0*(dot(sparse(transpose(A)), I)) + dot(sparse(Yle), Phi) +1j*w*(dot(sparse(Gamma), Q))
+    Y2 = escalings.P * np.*(P_mat,Q) -1.0*(*(transpose(Gamma), Phi))
+    Y3 = -1.0*(*(transpose(A), I)) + *((Yle), Phi) +1j*w*(*(Gamma, Q))
 
-    MatrixVector = precond_3_3_vector(LU_S, invZ, invP, A,Gamma, w, Y1, Y2, Y3)
+    MatrixVector = precond_3_3_vector(L, U, p, invZ, invP, A,Gamma, w, Y1, Y2, Y3)
 
     return MatrixVector
 end
@@ -627,9 +659,9 @@ function Quasi_static_iterative_solver(freq_in,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,L
         Yle = build_Yle_S(lumped_elements, ports, escalings, n, w[k] / escalings.freq, val_chiusura)
         invZ = sparse(range(1, stop=m), range(1, stop=m), (1. / (Z_self[:,0] + 1j * w[k] * diag_Lp)))
 
-        SS=Yle+dot(sparse(transpose(A)),dot(sparse(invZ),A))+1j*w[k]*dot(sparse(Gamma),dot(sparse(invP),transpose(Gamma)))
+        SS=Yle+(*(transpose(A),*(invZ,A))+1j*w[k]*(*(Gamma,*(invP,transpose(Gamma)))))
 
-        LU_S=lu(SS)
+        L, U, p=lu(SS)
         #LU_S = linalg.spilu(SS, drop_tol=1e-6, options=dict(SymmetricMode=True))
 
         for c1 in range(1, stop=num_ports)
@@ -638,13 +670,13 @@ function Quasi_static_iterative_solver(freq_in,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,L
             Is[n1] = 1.0 * escalings.Is
             Is[n2] = -1.0 * escalings.Is
 
-            tn = precond_3_3_Kt(LU_S, invZ, invP, A,Gamma, m, ns, Is)
+            tn = precond_3_3_Kt(L, U , p, invZ, invP, A,Gamma, m, ns, Is)
 
             #counter = gmres_counter()
 
-            products_law = x -> ComputeMatrixVector( w[k], escalings, A,Gamma, P_mat,Lp_x_mat,Lp_y_mat,Lp_z_mat,Z_self, Yle, invZ,invP, LU_S,x)
+            products_law = x -> ComputeMatrixVector( w[k], escalings, A,Gamma, P_mat,Lp_x_mat,Lp_y_mat,Lp_z_mat,Z_self, Yle, invZ,invP, L, U, p,x)
 
-            prodts = LinearMap(products_law, n + m + ns, n + m + ns,)
+            prodts = LinearMap(products_law, n + m + ns, n + m + ns)
 
             V_o, info = gmres(prodts, tn, x=X_prec[:, c1], reltol=GMRES_settings.tol[k], restart=nothing, maxiter=Inner_Iter, log=true)
 
@@ -658,15 +690,15 @@ function Quasi_static_iterative_solver(freq_in,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,L
             Is[n1] = 0.0
             Is[n2] = 0.0
 
-            if info == 0
-                print("convergence reached, number of iterations: ", counter.niter)
-            else
-                if info > 0
-                    print("convergence not reached, number of iterations: ", counter.niter)
-                else
-                    print("illegal input or breakdown, number of iterations: ", counter.niter)
-                end
-            end
+            # if info == 0
+            #     print("convergence reached, number of iterations: ", counter.niter)
+            # else
+            #     if info > 0
+            #         print("convergence not reached, number of iterations: ", counter.niter)
+            #     else
+            #         print("illegal input or breakdown, number of iterations: ", counter.niter)
+            #     end
+            # end
 
             for c2 in range(num_ports)
                 n3 = ports.port_nodes[c2, 1]
