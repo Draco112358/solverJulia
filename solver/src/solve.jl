@@ -1,6 +1,7 @@
 include("lp_compute.jl")
 include("solver_function.jl")
 using JSON
+using MLUtils: unsqueeze
 
 function encode_complex(z)
     if z isa Complex
@@ -163,7 +164,7 @@ function read_ports(inputData::Dict)
         opos[1, 3] = port_object.outputElement.transformationParams.position[3]*1e-3
         push!(output_positions, opos)
     @assert length(input_positions)==N_PORTS && length(output_positions)==N_PORTS
-    ports_out = port_def(inp_pos=np.stack([i for i in input_positions]), out_pos=np.stack([i for i in output_positions]),voxels=zeros(Int64, (N_PORTS, 2)), nodes=zeros(Int64,(N_PORTS, 2)))
+    ports_out = port_def(inp_pos=unsqueeze([i for i in input_positions], dims=2), out_pos=unsqueeze([i for i in output_positions], dims=2),voxels=zeros(Int64, (N_PORTS, 2)), nodes=zeros(Int64,(N_PORTS, 2)))
     end
     return ports_out
 end
@@ -210,7 +211,7 @@ function read_lumped_elements(inputData::Dict)
             
         @assert length(input_positions)==N_LUMPED_ELEMENTS && length(output_positions)==N_LUMPED_ELEMENTS && length(values)==N_LUMPED_ELEMENTS && length(types)==N_LUMPED_ELEMENTS
     
-        lumped_elements_out = le_def(val=np.stack([i for i in values]),typ=np.stack([i for i in types]),inp_pos=np.stack([i for i in input_positions]), out_pos=np.stack([i for i in output_positions]), \
+        lumped_elements_out = le_def(val=unsqueeze([i for i in values], dims=2),typ=unsqueeze([i for i in types], dims=2),inp_pos=unsqueeze([i for i in input_positions], dims=2), out_pos=unsqueeze([i for i in output_positions], dims=2), \
                                     voxels=zeros(Int64, (N_LUMPED_ELEMENTS, 2)), nodes=zeros(Int64, (N_LUMPED_ELEMENTS, 2)))
 
     return lumped_elements_out
@@ -259,7 +260,7 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams):
     origin = (origin_x,origin_y,origin_z)
     Nx, Ny, Nz = Int64(mesherDict['n_cells']['n_cells_x']), Int64(mesherDict['n_cells']['n_cells_y']), Int64(mesherDict['n_cells']['n_cells_z'])
 
-    grids = np.stack([mesherDict['mesher_matrices'][i] for i in mesherDict['mesher_matrices']])
+    grids = unsqueeze([mesherDict['mesher_matrices'][i] for i in mesherDict['mesher_matrices']], dims=2)
 
     frequencies = inputDict['frequencies']
     
@@ -277,8 +278,8 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams):
     
     # START SETTINGS--------------------------------------------
     # n_freq=10
-    println("numero frequenze",n_freq)
-    println("frequenze",frequencies)
+    print("numero frequenze",n_freq)
+    print("frequenze",frequencies)
     # print("frequenze trasformate",freq)
 
     
