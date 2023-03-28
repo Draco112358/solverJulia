@@ -8,7 +8,7 @@ end
 function bin_search(num, A)
 
     index = 0
-    n = A.shape[0]
+    n = size(A)[1]
     left = 0
     right = n-1
 
