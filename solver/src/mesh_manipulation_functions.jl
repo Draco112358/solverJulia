@@ -29,7 +29,7 @@ function bin_search(num, A)
     return index
 end
 
-function create_volumes_mapping_&&_centers(matrice,Nx,Ny,Nz,num_centri,sx,sy,sz,min_v)
+function create_volumes_mapping_and_centers(matrice,Nx,Ny,Nz,num_centri,sx,sy,sz,min_v)
 
     print("----",(Nx * Ny * Nz))
  
