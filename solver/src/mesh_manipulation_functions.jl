@@ -218,8 +218,17 @@ function create_nodes_ref(matrice, Nx,Ny,Nz, num_centri, external_g, m_volumes)
     return nodes_red,nodes
 end
 
+
+
 function distfcm(center, data)
-    out=sum((((data-ones((size(data)[1],1))*center))^2),dims=2)^0.5
+    function sum_el(array)
+        sum = 0
+        for el in array
+            sum = sum + el
+        end
+        return sum
+    end
+    out=sum(sum_el, ((data-ones((size(data)[1],1))*center))^2,dims=2)^0.5
     #out=np.power(np.sum((np.power((data-np.ones((data.shape[0],1))*center),2)),axis=1),0.5)
     return out
 end
