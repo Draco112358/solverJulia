@@ -219,7 +219,7 @@ function create_nodes_ref(matrice, Nx,Ny,Nz, num_centri, external_g, m_volumes)
 end
 
 function distfcm(center, data)
-    out=sum((((data-ones((size(data)[1],dims=1))*center))^2),dims=1)^0.5
+    out=sum((((data-ones((size(data)[1],1))*center))^2),dims=2)^0.5
     #out=np.power(np.sum((np.power((data-np.ones((data.shape[0],1))*center),2)),axis=1),0.5)
     return out
 end
@@ -501,6 +501,7 @@ function create_A_mats_volInd(matrice,Nx,Ny,Nz,mapping_Vox,mapAx, NAx, mapAy, NA
                            if (matrice[k,cont-1, cont2, cont3]==0)
                                lix_border[pos, 1] = k + 1
                                bars_Lp_x[pos][1] = bars_Lp_x[pos][1] - sx/2.0
+                           end
                         else
                             lix_border[pos, 1] = k + 1
                             bars_Lp_x[pos][1] = bars_Lp_x[pos][1] - sx / 2.0
@@ -709,6 +710,7 @@ function compute_diagonals(MATER,sx,sy,sz,lix_mat,liy_mat,liz_mat,lix_border,liy
     Cx = zeros(Complex ,(size(lix_border)[1], 4))
     Cy = zeros(Complex ,(size(liy_border)[1], 4))
     Cz = zeros(Complex ,(size(liz_border)[1], 4))
+    end
 
     for cont in range(1, stop=num_grids)
         if MATER[cont].Rx!=0

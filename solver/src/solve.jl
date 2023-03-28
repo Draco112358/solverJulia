@@ -14,27 +14,22 @@ end
        
 function dump_json_data(matrix_Z,matrix_S,matrix_Y)
 
-    solver_matrices_dict = {}
-    
-    solver_matrices_dict["matrix_Z"] = JSON.json(matrix_Z)
-    solver_matrices_dict["matrix_S"] = JSON.json(matrix_S)
-    solver_matrices_dict["matrix_Y"] = JSON.json(matrix_Y) 
+    solver_matrices_dict = Dict(
+        "matrix_Z" => JSON.json(matrix_Z),
+        "matrix_S" => JSON.json(matrix_S),
+        "matrix_Y" => JSON.json(matrix_Y)
+    )
 
     print(solver_matrices_dict)
     
     return solver_matrices_dict
 end
-        
-      
-struct signal
-    value
-end
+
 
 Base.@kwdef struct signal
     dict_element
-    value = complex(float(dict_element['Re']),float(dict_element['Im']))
-
-        
+    value = complex(float(dict_element["Re"]),float(dict_element)["Im"])
+end
         
 Base.@kwdef struct geom_attributes
     dict_element
@@ -183,11 +178,11 @@ function read_lumped_elements(inputData::Dict)
     values = []
     types = []
     N_LUMPED_ELEMENTS = length(lumped_elements_objects)
-    if N_LUMPED_ELEMENTS == 0:
+    if N_LUMPED_ELEMENTS == 0
         lumped_elements_out = le_def(val=zeros(0),typ=zeros(Int64, 0),inp_pos=zeros((0, 3)),out_pos=zeros((0, 3)),voxels=zeros(Int64, (0, 2)),nodes=zeros(Int64, (0, 2)))
         @assert length(input_positions)==N_LUMPED_ELEMENTS && length(output_positions)==N_LUMPED_ELEMENTS && length(values)==N_LUMPED_ELEMENTS && length(types)==N_LUMPED_ELEMENTS
-    else: 
-        for lumped_element_object in lumped_elements_objects:
+    else
+        for lumped_element_object in lumped_elements_objects
             @assert length(lumped_element_object.inputElement.transformationParams.position)==3
             ipos = zeros((1,3))
             ipos[1, 1] = lumped_element_object.inputElement.transformationParams.position[1]*1e-3
@@ -212,13 +207,13 @@ function read_lumped_elements(inputData::Dict)
             
         @assert length(input_positions)==N_LUMPED_ELEMENTS && length(output_positions)==N_LUMPED_ELEMENTS && length(values)==N_LUMPED_ELEMENTS && length(types)==N_LUMPED_ELEMENTS
     
-        lumped_elements_out = le_def(val=unsqueeze([i for i in values], dims=2),typ=unsqueeze([i for i in types], dims=2),inp_pos=unsqueeze([i for i in input_positions], dims=2), out_pos=unsqueeze([i for i in output_positions], dims=2), \
+        lumped_elements_out = le_def(val=unsqueeze([i for i in values], dims=2),typ=unsqueeze([i for i in types], dims=2),inp_pos=unsqueeze([i for i in input_positions], dims=2), out_pos=unsqueeze([i for i in output_positions], dims=2),
                                     voxels=zeros(Int64, (N_LUMPED_ELEMENTS, 2)), nodes=zeros(Int64, (N_LUMPED_ELEMENTS, 2)))
 
     return lumped_elements_out
 end
 
-function read_materials(inputData::Dict):
+function read_materials(inputData::Dict)
     @assert inputData isa Dict
     materials = inputData["materials"]
     materials_objects = [material(el) for el in materials]
@@ -228,18 +223,18 @@ end
 function read_signals(inputData::Dict)
     @assert inputData isa Dict
     signals = inputData["signals"]
-    @assert signals isa 
-end
-
-function read_signals(inputData::Dict):
-    @assert inputData isa Dict
-    signals = inputData["signals"]
-    signals_objects = [signal(Complex(Float64(el["Re"]),Float64(el["Im"]))) for el in signals]
+    signals_objects = [signal(el) for el in signals]
     return signals_objects
 end
 
+struct GMRES_set
+    Inner_Iter
+    Outer_Iter
+    tol
+end
+
     
-function doSolving(mesherOutput, solverInput, solverAlgoParams):
+function doSolving(mesherOutput, solverInput, solverAlgoParams)
 
     inputDict = solverInput
     mesherDict = mesherOutput
@@ -259,11 +254,11 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams):
     # origin_z = origin_z * 10
 
     origin = (origin_x,origin_y,origin_z)
-    Nx, Ny, Nz = Int64(mesherDict['n_cells']['n_cells_x']), Int64(mesherDict['n_cells']['n_cells_y']), Int64(mesherDict['n_cells']['n_cells_z'])
+    Nx, Ny, Nz = Int64(mesherDict["n_cells"]["n_cells_x"]), Int64(mesherDict["n_cells"]["n_cells_y"]), Int64(mesherDict["n_cells"]["n_cells_z"])
 
-    grids = unsqueeze([mesherDict['mesher_matrices'][i] for i in mesherDict['mesher_matrices']], dims=2)
+    grids = unsqueeze([mesherDict["mesher_matrices"][i] for i in mesherDict["mesher_matrices"]], dims=2)
 
-    frequencies = inputDict['frequencies']
+    frequencies = inputDict["frequencies"]
     
     n_freq = length(frequencies)
     
@@ -293,11 +288,6 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams):
     ind_low_freq= filter(i -> !iszero(frequencies[i]), findall(frequencies<1e5, frequencies))
     tol[ind_low_freq] = 1e-7
     
-    struct GMRES_set:
-        Inner_Iter
-        Outer_Iter
-        tol
-    end
 
     GMRES_settings = GMRES_set(inner_Iter,outer_Iter,tol)
     
@@ -314,17 +304,19 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams):
                                                                                                                                                             minimum_vertex=origin)  
     
 
-    for k in range(1, stop=size(ports.voxels)[1]):
+    for k in range(1, stop=size(ports.voxels)[1])
         ports.port_voxels[k,1] = ports.voxels[k,1]
         ports.port_voxels[k,2] = ports.voxels[k, 2]
         ports.port_nodes[k,1] = ports.nodes[k, 1]
         ports.port_nodes[k,2] = ports.nodes[k, 2]
+    end
 
-    for k in range(1, stop=size(lumped_elements.voxels)[1]):
+    for k in range(1, stop=size(lumped_elements.voxels)[1])
         lumped_elements.le_voxels[k,1]=lumped_elements.voxels[k,1]
         lumped_elements.le_voxels[k, 2] = lumped_elements.voxels[k, 2]
         lumped_elements.le_nodes[k, 1] = lumped_elements.nodes[k, 1]
         lumped_elements.le_nodes[k, 2] = lumped_elements.nodes[k, 2]
+    end
     
     # print("Time for mesher manipulation and data formatting:", round(time.perf_counter_ns() / 1000 - cpu_time,2))
     

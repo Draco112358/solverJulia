@@ -362,6 +362,8 @@ function build_Yle_S_no_scal(lumped_elements, ports, n, w, val_chiusura)
                 vals[ind[1]] = vals[ind[1]] - 1j * w * lumped_elements.value[c1]
             else
                 vals[ind[1]] = vals[ind[1]] - 1.0 / lumped_elements.value[c1]
+            end
+        end
             
         ind2 = findall(ind_r == n2, ind_r)
         ind2 = filter(i -> !iszero(ind_r[i]), ind2)
