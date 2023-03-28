@@ -659,11 +659,19 @@ function create_A_mats_volInd(matrice,Nx,Ny,Nz,mapping_Vox,mapAx, NAx, mapAy, NA
 end
 
 function ver_con(A,B)
-    return [A,B]
+    if ((typeof(A) == Vector{Vector{Int}} && typeof(B) == Vector{Vector{Int}}) || (typeof(A) == Vector{Vector{Float64}} && typeof(B) == Vector{Vector{Float64}}))
+        return vcat(A,B)
+    else
+        return [A,B]
+    end
 end
 
 function vect_con(A,B)
-    return [A B]
+    if ((typeof(A) == Vector{Int} && typeof(B) == Vector{Int}) || (typeof(A) == Vector{Float64} && typeof(B) == Vector{Float64}))
+        return [A;B]
+    else
+        return hcat(A,B)
+    end
 end
 
 function compute_diagonals(MATER,sx,sy,sz,lix_mat,liy_mat,liz_mat,lix_border,liy_border,liz_border)
