@@ -492,25 +492,31 @@ function precond_3_3_vector(L, U, p,invZ,invP,A,Gamma,w,X1,X2,X3)
     #M4 = LU_S.solve(csc_matrix.*(Gamma,M3))
     M5 = U\(L\X3[p])
 
-    Y[np.ix_(i1)] = Y[np.ix_(i1)]+M1-1.0*(*((invZ),*((A), M2)))
-    Y[np.ix_(i1)] = Y[np.ix_(i1)]+1j*w*(*((invZ),*((A), M4)))
-    Y[np.ix_(i1)] = Y[np.ix_(i1)]-1.0*(*((invZ),*((A), M5)))
+    for i in i1
+        Y[i] = Y[i]+M1-1.0*(*((invZ),*((A), M2)))
+        Y[i] = Y[i]+1j*w*(*((invZ),*((A), M4)))
+        Y[i] = Y[i]-1.0*(*((invZ),*((A), M5)))
+    end
 
     #Y[np.ix_(i1)] = Y[np.ix_(i1)]+M1-1.0*csc_matrix.*(invZ,csc_matrix.*(A,M2))
     #Y[np.ix_(i1)] = Y[np.ix_(i1)]+1j*w*csc_matrix.*(invZ, csc_matrix.*(A,M4))
     #Y[np.ix_(i1)] = Y[np.ix_(i1)]-1.0*csc_matrix.*(invZ, csc_matrix.*(A, M5))
 
-    Y[np.ix_(i2)] = Y[np.ix_(i2)]+(*(invP,*((transpose(Gamma)), M2)))
-    Y[np.ix_(i2)] = Y[np.ix_(i2)] + M3 -1j*w*(*(invP,*(transpose(Gamma), M4)))
-    Y[np.ix_(i2)] = Y[np.ix_(i2)]+(*(invP,*(transpose(Gamma), M5)))
+    for i in i2
+        Y[i] = Y[i]+(*(invP,*((transpose(Gamma)), M2)))
+        Y[i] = Y[i] + M3 -1j*w*(*(invP,*(transpose(Gamma), M4)))
+        Y[i] = Y[i]+(*(invP,*(transpose(Gamma), M5)))
+    end
 
     # Y[np.ix_(i2)] = Y[np.ix_(i2)]+csc_matrix.*(invP, csc_matrix.*(Gamma.transpose(), M2))
     # Y[np.ix_(i2)] = Y[np.ix_(i2)] + M3 -1j*w*csc_matrix.*(invP, csc_matrix.*(Gamma.transpose(), M4))
     # Y[np.ix_(i2)] = Y[np.ix_(i2)]+csc_matrix.*(invP, csc_matrix.*(Gamma.transpose(), M5))
 
-    Y[np.ix_(i3)] = Y[np.ix_(i3)]+M2
-    Y[np.ix_(i3)] = Y[np.ix_(i3)]-1j*w*M4
-    Y[np.ix_(i3)] = Y[np.ix_(i3)]+M5
+    for i in i3
+        Y[i] = Y[i]+M2
+        Y[i] = Y[i]-1j*w*M4
+        Y[i] = Y[i]+M5
+    end
 
     # Y[np.ix_(i3)] = Y[np.ix_(i3)]+M2
     # Y[np.ix_(i3)] = Y[np.ix_(i3)]-1j*w*M4
@@ -531,11 +537,17 @@ function precond_3_3_Kt(L, U, p, invZ, invP, A,Gamma, n1,n2, X3)
 
     M5 = U\(L\X3[p])
 
-    Y[np.ix_(i1)] = Y[np.ix_(i1)] - 1.0*csc_matrix.*(invZ, csc_matrix.*(A, M5))
+    for i in i1
+        Y[i] = Y[i] - 1.0*csc_matrix.*(invZ, csc_matrix.*(A, M5))
+    end
 
-    Y[np.ix_(i2)] = Y[np.ix_(i2)] + csc_matrix.*(invP, csc_matrix.*(Gamma.transpose(), M5))
+    for i in i2
+        Y[i] = Y[i] + csc_matrix.*(invP, csc_matrix.*(Gamma.transpose(), M5))
+    end
 
-    Y[np.ix_(i3)] = Y[np.ix_(i3)] + M5
+    for i in i3
+        Y[i] = Y[i] + M5
+    end
 
     return Y
 end
