@@ -1,5 +1,6 @@
 include("lp_compute.jl")
 include("solver_function.jl")
+include("mesh_manipulation_functions.jl")
 using JSON
 using MLUtils: unsqueeze
 
