@@ -33,13 +33,13 @@ function compute_Z_self(R,Cd,w)
     for cont in range(1,stop=len_R)
         for aux in range(1, stop=4)
             if R[cont,aux]!=0 && Cd[cont,aux]!=0
-                Z_self[cont]=Z_self[cont]+1.0/(1.0/R[cont,aux]+1j*w*Cd[cont,aux])
+                Z_self[cont]=Z_self[cont]+1.0/(1.0/R[cont,aux]+1im*w*Cd[cont,aux])
             else
                 if R[cont,aux]!=0
                     Z_self[cont]=Z_self[cont]+R[cont,aux]
                 else
                     if Cd[cont,aux]!=0
-                        Z_self[cont]=Z_self[cont]+1.0/(1j*w*Cd[cont,aux])
+                        Z_self[cont]=Z_self[cont]+1.0/(1im*w*Cd[cont,aux])
                     end
                 end
             end
@@ -632,7 +632,7 @@ function Quasi_static_iterative_solver(freq_in,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,L
     n = size(A)[2]
     ns = size(Gamma)[2]
 
-    w = 2 * mt.pi * freq
+    w = 2 * pi * freq
 
     nfreq = size(w)[1]
 
@@ -660,7 +660,7 @@ function Quasi_static_iterative_solver(freq_in,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,L
         diag_Lp[c+mx+my] = escalings.Lp*Lp_z_mat[c, c]
     end
 
-    invP = sparse((range(1, stop=ns), range(1, stop=ns), 1. / diag_P))
+    invP = sparse(range(1, stop=ns), range(1, stop=ns), 1. ./ diag_P)
 
     val_chiusura = 50.0
 

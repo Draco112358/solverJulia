@@ -1394,6 +1394,7 @@ function compute_P_matrix(centers,sup_type,sx,sy,sz)
             c1 = 0.0
         end
         for n in range(m, stop=N)
+            #println(sup_type[n])
             if sup_type[n] == 1
                 A2 = sx * sz
                 a2 = sx
