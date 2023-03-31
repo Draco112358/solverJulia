@@ -223,9 +223,25 @@ function create_nodes_ref(matrice, Nx,Ny,Nz, num_centri, external_g, m_volumes)
     return nodes_red,nodes
 end
 
+function slicematrix(A::AbstractMatrix{T}) where T
+    m, n = size(A)
+    B = Vector{T}[Vector{T}(undef, n) for _ in 1:m]
+    for i in 1:m
+        B[i] .= A[i, :]
+    end
+    return B
+end
+
 function distfcm(center, data)
-    out=sum((((data-ones((size(data)[1],1))*center))^2),dims=2)^0.5
-    #out=np.power(np.sum((np.power((data-np.ones((data.shape[0],1))*center),2)),axis=1),0.5)
+    function sum_el(array)
+        sum = 0
+        for el in array
+            sum = sum + el
+        end
+        return sum
+    end
+
+    out = slicematrix(sum(sum_el, (data .- (ones(size(data)[1],1) .* center)[1][1][1]).^2, dims=2).^0.5)
     return out
 end
 
