@@ -544,18 +544,9 @@ function precond_3_3_Kt(L, U, p, invZ, invP, A,Gamma, n1,n2, X3)
 
     M5 = U\(L\X3[p])
 
-    for i in i1
-        Y[i] = Y[i] - 1.0*(*(invZ, *(A, M5)))[i]
-        Y[i] = Y[i] - 1.0*(*(invZ, *(A, M5)))[i]
-    end
-
-    for i in i2
-        Y[i] = Y[i] + (*(invP, *(transpose(Gamma), M5)))
-    end
-
-    for i in i3
-        Y[i] = Y[i] + M5
-    end
+    Y[i1] .= Y[i1] .- 1.0*(*(invZ, *(A, M5)))
+    Y[i2] .= Y[i2] .+ (*(invP, *(transpose(Gamma), M5)))
+    Y[i3] .= Y[i3] .+ M5
 
     return Y
 end
@@ -674,7 +665,7 @@ function Quasi_static_iterative_solver(freq_in,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,L
     diag_Cd=escalings.Cd * diag_Cd
 
     for k in range(1, stop=nfreq)
-        println("Freq n=", k+1, " - Freq Tot=", nfreq)
+        println("Freq n=", k, " - Freq Tot=", nfreq)
         Z_self = compute_Z_self(diag_R,diag_Cd, w[k])
         #println(Z_self)
         Yle = build_Yle_S(lumped_elements, ports, escalings, n, w[k] / escalings.freq, val_chiusura)
