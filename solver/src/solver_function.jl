@@ -33,18 +33,19 @@ function compute_Z_self(R,Cd,w)
     for cont in range(1,stop=len_R)
         for aux in range(1, stop=4)
             if R[cont,aux]!=0 && Cd[cont,aux]!=0
-                Z_self[cont]=Z_self[cont]+1.0/(1.0/R[cont,aux]+1im*w*Cd[cont,aux])
+                Z_self[cont]=(Z_self[cont]+1.0)/(1.0/R[cont,aux]+1im*w*Cd[cont,aux])
             else
                 if R[cont,aux]!=0
                     Z_self[cont]=Z_self[cont]+R[cont,aux]
                 else
                     if Cd[cont,aux]!=0
-                        Z_self[cont]=Z_self[cont]+1.0/(1im*w*Cd[cont,aux])
+                        Z_self[cont]=(Z_self[cont]+1.0)/(1im*w*Cd[cont,aux])
                     end
                 end
             end
         end
     end
+    #println(Z_self)
     return Z_self
 end
 
@@ -64,7 +65,10 @@ function build_Yle_S(lumped_elements, ports, escalings, n, w, val_chiusura)
 
     N_ele = length(unique(contenitore))
 
+    println(N_ele)
+
     NNz_max = N_ele * N_ele
+
 
     ind_r = zeros(Int64, NNz_max)
     ind_c = zeros(Int64, NNz_max)
@@ -77,34 +81,35 @@ function build_Yle_S(lumped_elements, ports, escalings, n, w, val_chiusura)
         n1 = lumped_elements.le_nodes[c1, 1]
         n2 = lumped_elements.le_nodes[c1, 2]
 
-        ind1 = findall(ind_r == n1 , ind_r)
+
+        ind1 = findall(ind -> ind == n1 , ind_r)
         ind1 = filter(i -> !iszero(ind_r[i]), ind1)
-        ind2 = findall(ind_c == n1, ind_c)
+        ind2 = findall(ind -> ind == n1, ind_c)
         ind2 = filter(i -> !iszero(ind_c[i]), ind2)
         ind = intersect(ind1, ind2)
 
         if length(ind) == 0
             ind_r[cont] = n1
             ind_c[cont] = n1
-            if lumped_elements.type[c1] == 2
-                vals[cont] = 1j * w * lumped_elements.value[c1]
+            if lumped_elements.type[c1][1] == 2
+                vals[cont] = 1im * w * lumped_elements.value[c1][1]
             else
-                vals[cont] = 1.0 / lumped_elements.value[c1]
+                vals[cont] = 1.0 / lumped_elements.value[c1][1]
             end
             cont = cont + 1
             
         else
-            if lumped_elements.type[c1] == 2
-                vals[ind[1]] = vals[ind[1]] + 1j * w * lumped_elements.value[c1]
+            if lumped_elements.type[c1][1] == 2
+                vals[ind[1]] = vals[ind[1]] + 1im * w * lumped_elements.value[c1][1]
             else
-                vals[ind[1]] = vals[ind[1]] + 1.0 / lumped_elements.value[c1]
+                vals[ind[1]] = (vals[ind[1]] + 1.0) / lumped_elements.value[c1][1]
             end
         end
 
 
-        ind1 = findall(ind_r == n2, ind_r)
+        ind1 = findall(ind -> ind == n2, ind_r)
         ind1 = filter(i -> !iszero(ind_r[i]), ind1)
-        ind2 = findall(ind_c == n2 , ind_c)
+        ind2 = findall(ind -> ind == n2 , ind_c)
         ind2 = filter(i -> !iszero(ind_c[i]), ind2)
         #ind1 = ifelse(ind_r == n2, ind_r, n2)
         #ind2 = ifelse(ind_c == n2, ind_c, n2)
@@ -113,23 +118,23 @@ function build_Yle_S(lumped_elements, ports, escalings, n, w, val_chiusura)
         if length(ind) == 0
             ind_r[cont] = n2
             ind_c[cont] = n2
-            if lumped_elements.type[c1] == 2
-                vals[cont] = 1j * w * lumped_elements.value[c1]
+            if lumped_elements.type[c1][1] == 2
+                vals[cont] = 1im * w * lumped_elements.value[c1][1]
             else
-                vals[cont] = 1.0 / lumped_elements.value[c1]
+                vals[cont] = 1.0 / lumped_elements.value[c1][1]
             end
             cont = cont + 1
         else
-            if lumped_elements.type[c1] == 2
-                vals[ind[1]] = vals[ind[1]] + 1j * w * lumped_elements.value[c1]
+            if lumped_elements.type[c1][1] == 2
+                vals[ind[1]] = vals[ind[1]] + 1im * w * lumped_elements.value[c1][1]
             else
-                vals[ind[1]] = vals[ind[1]] + 1.0 / lumped_elements.value[c1]
+                vals[ind[1]] = (vals[ind[1]] + 1.0) / lumped_elements.value[c1][1]
             end
         end
 
-        ind1 = findall(ind_r == n1, ind_r)
+        ind1 = findall(ind -> ind == n1, ind_r)
         ind1 = filter(i -> !iszero(ind_r[i]), ind1)
-        ind2 = findall(ind_c == n2, ind_c)
+        ind2 = findall(ind -> ind == n2, ind_c)
         ind2 = filter(i -> !iszero(ind_c[i]), ind2)
         #ind1 = ifelse(ind_r == n1, ind_r, n1)
         #ind2 = ifelse(ind_c == n2, ind_c, n2)
@@ -137,43 +142,43 @@ function build_Yle_S(lumped_elements, ports, escalings, n, w, val_chiusura)
 
 
         if length(ind) == 0
-            if lumped_elements.type[c1] == 2
-                vals[cont] = -1j * w * lumped_elements.value[c1]
+            if lumped_elements.type[c1][1] == 2
+                vals[cont] = -1im * w * lumped_elements.value[c1][1]
             else
-                vals[cont] = -1.0 / lumped_elements.value[c1]
+                vals[cont] = -1.0 / lumped_elements.value[c1][1]
             end
             ind_r[cont] = n1
             ind_c[cont] = n2
             cont = cont + 1
         else
-            if lumped_elements.type[c1] == 2
-                vals[ind[1]] = vals[ind[1]] - 1j * w * lumped_elements.value[c1]
+            if lumped_elements.type[c1][1] == 2
+                vals[ind[1]] = vals[ind[1]] - 1im * w * lumped_elements.value[c1][1]
             else
-                vals[ind[1]] = vals[ind[1]] - 1.0 / lumped_elements.value[c1]
+                vals[ind[1]] = vals[ind[1]] - 1.0 / lumped_elements.value[c1][1]
             end
         end
 
-        ind2 = findall(ind_r == n2, ind_r)
+        ind2 = findall(ind -> ind == n2, ind_r)
         ind2 = filter(i -> !iszero(ind_r[i]), ind2)
-        ind1 = findall(ind_c == n1, ind_c)
+        ind1 = findall(ind -> ind == n1, ind_c)
         ind1 = filter(i -> !iszero(ind_c[i]), ind1)
         #ind2 = ifelse(ind_r == n2, ind_r, n2)
         #ind1 = ifelse(ind_c == n1, ind_c, n1)
         ind = intersect(ind1, ind2)
         if length(ind) == 0
-            if lumped_elements.type[c1] == 2
-                vals[cont] = -1j * w * lumped_elements.value[c1]
+            if lumped_elements.type[c1][1] == 2
+                vals[cont] = -1im * w * lumped_elements.value[c1][1]
             else
-                vals[cont] = -1.0 / lumped_elements.value[c1]
+                vals[cont] = -1.0 / lumped_elements.value[c1][1]
             end
             ind_r[cont] = n2
             ind_c[cont] = n1
             cont = cont + 1
         else
-            if lumped_elements.type[c1] == 2
-                vals[ind[1]] = vals[ind[1]] - 1j * w * lumped_elements.value[c1]
+            if lumped_elements.type[c1][1] == 2
+                vals[ind[1]] = vals[ind[1]] - 1im * w * lumped_elements.value[c1][1]
             else
-                vals[ind[1]] = vals[ind[1]] - 1.0 / lumped_elements.value[c1]
+                vals[ind[1]] = vals[ind[1]] - 1.0 / lumped_elements.value[c1][1]
             end
         end
     end
@@ -185,9 +190,9 @@ function build_Yle_S(lumped_elements, ports, escalings, n, w, val_chiusura)
         n1 = ports.port_nodes[c1, 1]
         n2 = ports.port_nodes[c1, 2]
 
-        ind1 = findall(ind_r == n1, ind_r)
+        ind1 = findall(ind -> ind == n1, ind_r)
         ind1 = filter(i -> !iszero(ind_r[i]), ind1)
-        ind2 = findall(ind_c == n1, ind_c)
+        ind2 = findall(ind -> ind == n1, ind_c)
         ind2 = filter(i -> !iszero(ind_c[i]), ind2)
         #ind1 = ifelse(ind_r == n1, ind_r, n1)
         #ind2 = ifelse(ind_c == n1, ind_c, n1)
@@ -203,9 +208,9 @@ function build_Yle_S(lumped_elements, ports, escalings, n, w, val_chiusura)
             vals[ind[1]] = vals[ind[1]] + 1 / val_chiusura
         end
 
-        ind1 = findall(ind_r == n2, ind_r)
+        ind1 = findall(ind -> ind == n2, ind_r)
         ind1 = filter(i -> !iszero(ind_r[i]), ind1)
-        ind2 = findall(ind_c == n2, ind_c)
+        ind2 = findall(ind -> ind == n2, ind_c)
         ind2 = filter(i -> !iszero(ind_c[i]), ind2)
         #ind1 = ifelse(ind_r == n2, ind_r, n2)
         #ind2 = ifelse(ind_c == n2, ind_c, n2)
@@ -217,12 +222,12 @@ function build_Yle_S(lumped_elements, ports, escalings, n, w, val_chiusura)
             vals[cont] = 1.0 / val_chiusura
             cont = cont + 1
         else
-            vals[ind[1]] = vals[ind[1]] + 1.0 / val_chiusura
+            vals[ind[1]] = (vals[ind[1]] + 1.0) / val_chiusura
         end
 
-        ind1 = findall(ind_r == n1, ind_r)
+        ind1 = findall(ind -> ind == n1, ind_r)
         ind1 = filter(i -> !iszero(ind_r[i]), ind1)
-        ind2 = findall(ind_c == n2, ind_c)
+        ind2 = findall(ind -> ind == n2, ind_c)
         ind2 = filter(i -> !iszero(ind_c[i]), ind2)
         #ind1 = ifelse(ind_r == n1, ind_r, n1)
         #ind2 = ifelse(ind_c == n2, ind_c, n2)
@@ -237,15 +242,15 @@ function build_Yle_S(lumped_elements, ports, escalings, n, w, val_chiusura)
             vals[ind[1]] = vals[ind[1]] - 1.0 / val_chiusura
         end
 
-        ind1 = findall(ind_r == n2, ind_r)
+        ind1 = findall(ind -> ind == n2, ind_r)
         ind1 = filter(i -> !iszero(ind_r[i]), ind1)
-        ind2 = findall(ind_c == n1, ind_c)
+        ind2 = findall(ind -> ind == n1, ind_c)
         ind2 = filter(i -> !iszero(ind_c[i]), ind2)
         #ind1 = ifelse(ind_r == n2, ind_r, n2)
         #ind2 = ifelse(ind_c == n1, ind_c, n1)
         ind = intersect(ind1, ind2)
 
-        if ind.size == 0
+        if length(ind) == 0
             vals[cont] = -1.0 / val_chiusura
             ind_r[cont] = n2
             ind_c[cont] = n1
@@ -255,8 +260,8 @@ function build_Yle_S(lumped_elements, ports, escalings, n, w, val_chiusura)
         end
     end
 
-    Yle = sparse(ind_r[1:cont], ind_c[1:cont], escalings.Yle*vals[1:cont])
-
+    Yle = sparse(ind_r[1:cont-1], ind_c[1:cont-1], escalings.Yle*vals[1:cont-1],n,n)
+    println(size(Yle))
     return Yle
 end
 
@@ -291,9 +296,9 @@ function build_Yle_S_no_scal(lumped_elements, ports, n, w, val_chiusura)
     for c1 in range(1, stop=nlum)
         n1 = lumped_elements.le_nodes[c1, 1]
         n2 = lumped_elements.le_nodes[c1, 2]
-        ind1 = findall(ind_r == n1, ind_r)
+        ind1 = findall(ind -> ind == n1, ind_r)
         ind1 = filter(i -> !iszero(ind_r[i]), ind1)
-        ind2 = findall(ind_c == n1, ind_c)
+        ind2 = findall(ind -> ind == n1, ind_c)
         ind2 = filter(i -> !iszero(ind_c[i]), ind2)
         #ind1 = ifelse(ind_r == n1, ind_r, n1)
         #ind2 = ifelse(ind_c == n1, ind_c, n1)
@@ -301,23 +306,23 @@ function build_Yle_S_no_scal(lumped_elements, ports, n, w, val_chiusura)
         if length(ind) == 0
             ind_r[cont] = n1
             ind_c[cont] = n1
-            if lumped_elements.type[c1] == 2
-                vals[cont] = 1j * w * lumped_elements.value[c1]
+            if lumped_elements.type[c1][1] == 2
+                vals[cont] = 1im * w * lumped_elements.value[c1][1]
             else
-                vals[cont] = 1.0 / lumped_elements.value[c1]
+                vals[cont] = 1.0 / lumped_elements.value[c1][1]
             cont = cont + 1
             end
         else
-            if lumped_elements.type[c1] == 2
-                vals[ind[1]] = vals[ind[1]] + 1j * w * lumped_elements.value[c1]
+            if lumped_elements.type[c1][1] == 2
+                vals[ind[1]] = vals[ind[1]] + 1im * w * lumped_elements.value[c1][1]
             else
-                vals[ind[1]] = vals[ind[1]] + 1.0 / lumped_elements.value[c1]
+                vals[ind[1]] = (vals[ind[1]] + 1.0) / lumped_elements.value[c1][1]
             end
         end
 
-        ind1 = findall(ind_r == n2, ind_r)
+        ind1 = findall(ind -> ind == n2, ind_r)
         ind1 = filter(i -> !iszero(ind_r[i]), ind1)
-        ind2 = findall(ind_c == n2, ind_c)
+        ind2 = findall(ind -> ind == n2, ind_c)
         ind2 = filter(i -> !iszero(ind_c[i]), ind2)
         #ind1 = ifelse(ind_r == n2, ind_r, n2)
         #ind2 = ifelse(ind_c == n2, ind_c, n2)
@@ -326,66 +331,66 @@ function build_Yle_S_no_scal(lumped_elements, ports, n, w, val_chiusura)
         if length(ind) == 0
             ind_r[cont] = n2
             ind_c[cont] = n2
-            if lumped_elements.type[c1] == 2
-                vals[cont] = 1j * w * lumped_elements.value[c1]
+            if lumped_elements.type[c1][1] == 2
+                vals[cont] = 1im * w * lumped_elements.value[c1][1]
             else
-                vals[cont] = 1.0 / lumped_elements.value[c1]
+                vals[cont] = 1.0 / lumped_elements.value[c1][1]
             cont = cont + 1
             end
         else
-            if lumped_elements.type[c1] == 2
-                vals[ind[1]] = vals[ind[1]] + 1j * w * lumped_elements.value[c1]
+            if lumped_elements.type[c1][1] == 2
+                vals[ind[1]] = vals[ind[1]] + 1im * w * lumped_elements.value[c1][1]
             else
-                vals[ind[1]] = vals[ind[1]] + 1.0 / lumped_elements.value[c1]
+                vals[ind[1]] = (vals[ind[1]] + 1.0) / lumped_elements.value[c1][1]
             end
         end
 
-        ind1 = findall(ind_r == n1, ind_r)
+        ind1 = findall(ind -> ind == n1, ind_r)
         ind1 = filter(i -> !iszero(ind_r[i]), ind1)
-        ind2 = findall(ind_c == n2, ind_c)
+        ind2 = findall(ind -> ind == n2, ind_c)
         ind2 = filter(i -> !iszero(ind_c[i]), ind2)
         #ind1 = ifelse(ind_r == n1, ind_r, n1)
         #ind2 = ifelse(ind_c == n2, ind_c, n2)
         ind = intersect(ind1, ind2)
 
         if length(ind) == 0
-            if lumped_elements.type[c1] == 2
-                vals[cont] = -1j * w * lumped_elements.value[c1]
+            if lumped_elements.type[c1][1] == 2
+                vals[cont] = -1im * w * lumped_elements.value[c1][1]
             else
-                vals[cont] = -1.0 / lumped_elements.value[c1]
+                vals[cont] = -1.0 / lumped_elements.value[c1][1]
             end
             ind_r[cont] = n1
             ind_c[cont] = n2
             cont = cont + 1
         else
-            if lumped_elements.type[c1] == 2
-                vals[ind[1]] = vals[ind[1]] - 1j * w * lumped_elements.value[c1]
+            if lumped_elements.type[c1][1] == 2
+                vals[ind[1]] = vals[ind[1]] - 1im * w * lumped_elements.value[c1][1]
             else
-                vals[ind[1]] = vals[ind[1]] - 1.0 / lumped_elements.value[c1]
+                vals[ind[1]] = vals[ind[1]] - 1.0 / lumped_elements.value[c1][1]
             end
         end
             
-        ind2 = findall(ind_r == n2, ind_r)
+        ind2 = findall(ind -> ind == n2, ind_r)
         ind2 = filter(i -> !iszero(ind_r[i]), ind2)
-        ind1 = findall(ind_c == n1, ind_c)  
+        ind1 = findall(ind -> ind == n1, ind_c)  
         ind1 = filter(i -> !iszero(ind_c[i]), ind1)
         #ind2 = ifelse(ind_r == n2, ind_r, n2)      
         #ind1 = ifelse(ind_c == n1, ind_c, n1)
         ind = intersect(ind1, ind2)
         if length(ind) == 0
-            if lumped_elements.type[c1] == 2
-                vals[cont] = -1j * w * lumped_elements.value[c1]
+            if lumped_elements.type[c1][1] == 2
+                vals[cont] = -1im * w * lumped_elements.value[c1][1]
             else
-                vals[cont] = -1.0 / lumped_elements.value[c1]
+                vals[cont] = -1.0 / lumped_elements.value[c1][1]
             end
             ind_r[cont] = n2
             ind_c[cont] = n1
             cont = cont + 1
         else
-            if lumped_elements.type[c1] == 2
-                vals[ind[1]] = vals[ind[1]] - 1j * w * lumped_elements.value[c1]
+            if lumped_elements.type[c1][1] == 2
+                vals[ind[1]] = vals[ind[1]] - 1im * w * lumped_elements.value[c1][1]
             else
-                vals[ind[1]] = vals[ind[1]] - 1.0 / lumped_elements.value[c1]
+                vals[ind[1]] = vals[ind[1]] - 1.0 / lumped_elements.value[c1][1]
             end
         end
     end
@@ -397,9 +402,9 @@ function build_Yle_S_no_scal(lumped_elements, ports, n, w, val_chiusura)
         n1 = ports.port_nodes[c1, 1]
         n2 = ports.port_nodes[c1, 2]
 
-        ind1 = findall(ind_r == n1, ind_r)
+        ind1 = findall(ind -> ind == n1, ind_r)
         ind1 = filter(i -> !iszero(ind_r[i]), ind1)
-        ind2 = findall(ind_c == n2, ind_c)
+        ind2 = findall(ind -> ind == n2, ind_c)
         ind2 = filter(i -> !iszero(ind_c[i]), ind2)
         #ind1 = ifelse(ind_r == n1, ind_r, n1)
         #ind2 = ifelse(ind_c == n1, ind_c, n1)
@@ -415,9 +420,9 @@ function build_Yle_S_no_scal(lumped_elements, ports, n, w, val_chiusura)
             vals[ind[1]] = vals[ind[1]] + 1 / val_chiusura
         end
 
-        ind1 = findall(ind_r == n2, ind_r)
+        ind1 = findall(ind -> ind == n2, ind_r)
         ind1 = filter(i -> !iszero(ind_r[i]), ind1)
-        ind2 = findall(ind_c == n2, ind_c)
+        ind2 = findall(ind -> ind == n2, ind_c)
         ind2 = filter(i -> !iszero(ind_c[i]), ind2)
         #ind1 = ifelse(ind_r == n2, ind_r, n2)
         #ind2 = ifelse(ind_c == n2, ind_c, n2)
@@ -429,11 +434,11 @@ function build_Yle_S_no_scal(lumped_elements, ports, n, w, val_chiusura)
             vals[cont] = 1.0 / val_chiusura
             cont = cont + 1
         else
-            vals[ind[1]] = vals[ind[1]] + 1.0 / val_chiusura
+            vals[ind[1]] = (vals[ind[1]] + 1.0) / val_chiusura
         end
-        ind1 = findall(ind_r == n1, ind_r)
+        ind1 = findall(ind -> ind == n1, ind_r)
         ind1 = filter(i -> !iszero(ind_r[i]), ind1)
-        ind2 = findall(ind_c == n2, ind_c)
+        ind2 = findall(ind -> ind == n2, ind_c)
         ind2 = filter(i -> !iszero(ind_c[i]), ind2)
         #ind1 = ifelse(ind_r == n1, ind_r, n1)
         #ind2 = ifelse(ind_c == n2, ind_c, n2)
@@ -447,9 +452,9 @@ function build_Yle_S_no_scal(lumped_elements, ports, n, w, val_chiusura)
         else
             vals[ind[1]] = vals[ind[1]] - 1.0 / val_chiusura
         end
-        ind1 = findall(ind_r == n2, ind_r)
+        ind1 = findall(ind -> ind == n2, ind_r)
         ind1 = filter(i -> !iszero(ind_r[i]), ind1)
-        ind2 = findall(ind_c == n1, ind_c)
+        ind2 = findall(ind -> ind == n1, ind_c)
         ind2 = filter(i -> !iszero(ind_c[i]), ind2)
         #ind1 = ifelse(ind_r == n2, ind_r, n2)
         #ind2 = ifelse(ind_c == n1, ind_c, n1)
@@ -496,32 +501,32 @@ function precond_3_3_vector(L, U, p,invZ,invP,A,Gamma,w,X1,X2,X3)
 
     for i in i1
         Y[i] = Y[i]+M1-1.0*(*((invZ),*((A), M2)))
-        Y[i] = Y[i]+1j*w*(*((invZ),*((A), M4)))
+        Y[i] = Y[i]+1im*w*(*((invZ),*((A), M4)))
         Y[i] = Y[i]-1.0*(*((invZ),*((A), M5)))
     end
 
     #Y[np.ix_(i1)] = Y[np.ix_(i1)]+M1-1.0*csc_matrix.*(invZ,csc_matrix.*(A,M2))
-    #Y[np.ix_(i1)] = Y[np.ix_(i1)]+1j*w*csc_matrix.*(invZ, csc_matrix.*(A,M4))
+    #Y[np.ix_(i1)] = Y[np.ix_(i1)]+1im*w*csc_matrix.*(invZ, csc_matrix.*(A,M4))
     #Y[np.ix_(i1)] = Y[np.ix_(i1)]-1.0*csc_matrix.*(invZ, csc_matrix.*(A, M5))
 
     for i in i2
         Y[i] = Y[i]+(*(invP,*((transpose(Gamma)), M2)))
-        Y[i] = Y[i] + M3 -1j*w*(*(invP,*(transpose(Gamma), M4)))
+        Y[i] = Y[i] + M3 -1im*w*(*(invP,*(transpose(Gamma), M4)))
         Y[i] = Y[i]+(*(invP,*(transpose(Gamma), M5)))
     end
 
     # Y[np.ix_(i2)] = Y[np.ix_(i2)]+csc_matrix.*(invP, csc_matrix.*(Gamma.transpose(), M2))
-    # Y[np.ix_(i2)] = Y[np.ix_(i2)] + M3 -1j*w*csc_matrix.*(invP, csc_matrix.*(Gamma.transpose(), M4))
+    # Y[np.ix_(i2)] = Y[np.ix_(i2)] + M3 -1im*w*csc_matrix.*(invP, csc_matrix.*(Gamma.transpose(), M4))
     # Y[np.ix_(i2)] = Y[np.ix_(i2)]+csc_matrix.*(invP, csc_matrix.*(Gamma.transpose(), M5))
 
     for i in i3
         Y[i] = Y[i]+M2
-        Y[i] = Y[i]-1j*w*M4
+        Y[i] = Y[i]-1im*w*M4
         Y[i] = Y[i]+M5
     end
 
     # Y[np.ix_(i3)] = Y[np.ix_(i3)]+M2
-    # Y[np.ix_(i3)] = Y[np.ix_(i3)]-1j*w*M4
+    # Y[np.ix_(i3)] = Y[np.ix_(i3)]-1im*w*M4
     # Y[np.ix_(i3)] = Y[np.ix_(i3)]+M5
 
     return Y
@@ -532,19 +537,20 @@ function precond_3_3_Kt(L, U, p, invZ, invP, A,Gamma, n1,n2, X3)
     n3 = length(X3)
 
     i1 = range(1, stop=n1)
-    i2 = range(n1, stop=n1 + n2)
-    i3 = range(n1 + n2, stop=n1 + n2 + n3)
+    i2 = range(n1+1, stop=n1 + n2)
+    i3 = range(n1 + n2 + 1, stop=n1 + n2 + n3)
 
-    Y = zeros(Complex, n1 + n2 + n3,1)
+    Y = zeros(ComplexF64, n1 + n2 + n3,1)
 
     M5 = U\(L\X3[p])
 
     for i in i1
-        Y[i] = Y[i] - 1.0*csc_matrix.*(invZ, csc_matrix.*(A, M5))
+        Y[i] = Y[i] - 1.0*(*(invZ, *(A, M5)))[i]
+        Y[i] = Y[i] - 1.0*(*(invZ, *(A, M5)))[i]
     end
 
     for i in i2
-        Y[i] = Y[i] + csc_matrix.*(invP, csc_matrix.*(Gamma.transpose(), M5))
+        Y[i] = Y[i] + (*(invP, *(transpose(Gamma), M5)))
     end
 
     for i in i3
@@ -599,14 +605,14 @@ function ComputeMatrixVector(w,escalings,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,Lp_z_ma
     ia2 = range(mx, stop=mx + my)
     ia3 = range(mx + my, stop=mx + my + mz)
 
-    Y1[ia1] = 1j * w * escalings.Lp * *(Lp_x_mat, I[ia1])
-    Y1[ia2] = 1j * w * escalings.Lp * *(Lp_y_mat, I[ia2])
-    Y1[ia3] = 1j * w * escalings.Lp * *(Lp_z_mat, I[ia3])
+    Y1[ia1] = 1im * w * escalings.Lp * *(Lp_x_mat, I[ia1])
+    Y1[ia2] = 1im * w * escalings.Lp * *(Lp_y_mat, I[ia2])
+    Y1[ia3] = 1im * w * escalings.Lp * *(Lp_z_mat, I[ia3])
 
     Y1=Y1+Z_self.*I+*((A), Phi)
 
     Y2 = escalings.P * np.*(P_mat,Q) -1.0*(*(transpose(Gamma), Phi))
-    Y3 = -1.0*(*(transpose(A), I)) + *((Yle), Phi) +1j*w*(*(Gamma, Q))
+    Y3 = -1.0*(*(transpose(A), I)) + *((Yle), Phi) +1im*w*(*(Gamma, Q))
 
     MatrixVector = precond_3_3_vector(L, U, p, invZ, invP, A,Gamma, w, Y1, Y2, Y3)
 
@@ -660,7 +666,7 @@ function Quasi_static_iterative_solver(freq_in,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,L
         diag_Lp[c+mx+my] = escalings.Lp*Lp_z_mat[c, c]
     end
 
-    invP = sparse(range(1, stop=ns), range(1, stop=ns), 1. ./ diag_P)
+    invP = sparse(range(1, stop=ns), range(1, stop=ns), 1. ./ diag_P,ns,ns)
 
     val_chiusura = 50.0
 
@@ -668,14 +674,19 @@ function Quasi_static_iterative_solver(freq_in,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,L
     diag_Cd=escalings.Cd * diag_Cd
 
     for k in range(1, stop=nfreq)
-        print("Freq n=", k+1, " - Freq Tot=", nfreq)
+        println("Freq n=", k+1, " - Freq Tot=", nfreq)
         Z_self = compute_Z_self(diag_R,diag_Cd, w[k])
+        #println(Z_self)
         Yle = build_Yle_S(lumped_elements, ports, escalings, n, w[k] / escalings.freq, val_chiusura)
-        invZ = sparse(range(1, stop=m), range(1, stop=m), (1. / (Z_self[:,0] + 1j * w[k] * diag_Lp)))
+        invZ = sparse(range(1, stop=m), range(1, stop=m), (1. ./ (Z_self[:,1] .+ (1im * w[k] * diag_Lp))),m,m)
+        #println(size(Yle))
+        #println(size((*(transpose(A),*(invZ,A))+1im*w[k]*(*(Gamma,*(invP,transpose(Gamma)))))))
+        SS = Yle+(*(transpose(A),*(invZ,A))+1im*w[k]*(*(Gamma,*(invP,transpose(Gamma)))))
+        #SS=Yle+(*(transpose(A),*(invZ,A))+1im*w[k]*(*(Gamma,*(invP,transpose(Gamma)))))
 
-        SS=Yle+(*(transpose(A),*(invZ,A))+1j*w[k]*(*(Gamma,*(invP,transpose(Gamma)))))
+        println(SS)
 
-        L, U, p=lu(SS)
+        F=lu(SS)
         #LU_S = linalg.spilu(SS, drop_tol=1e-6, options=dict(SymmetricMode=True))
 
         for c1 in range(1, stop=num_ports)
@@ -684,11 +695,11 @@ function Quasi_static_iterative_solver(freq_in,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,L
             Is[n1] = 1.0 * escalings.Is
             Is[n2] = -1.0 * escalings.Is
 
-            tn = precond_3_3_Kt(L, U , p, invZ, invP, A,Gamma, m, ns, Is)
+            tn = precond_3_3_Kt(F.L, F.U , F.p, invZ, invP, A,Gamma, m, ns, Is)
 
             #counter = gmres_counter()
 
-            products_law = x -> ComputeMatrixVector( w[k], escalings, A,Gamma, P_mat,Lp_x_mat,Lp_y_mat,Lp_z_mat,Z_self, Yle, invZ,invP, L, U, p,x)
+            products_law = x -> ComputeMatrixVector( w[k], escalings, A,Gamma, P_mat,Lp_x_mat,Lp_y_mat,Lp_z_mat,Z_self, Yle, invZ,invP, F.L, F.U, F.p,x)
 
             prodts = LinearMap(products_law, n + m + ns, n + m + ns)
 

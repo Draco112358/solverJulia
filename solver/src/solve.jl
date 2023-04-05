@@ -166,7 +166,7 @@ function read_ports(inputData::Dict)
         push!(inp_pos, unsqueeze([i], dims=2))
     end
     out_pos = []
-    for i in input_positions
+    for i in output_positions
         push!(out_pos, unsqueeze([i], dims=2))
     end
     ports_out = port_def(inp_pos, out_pos,zeros(Int64, (N_PORTS, 2)),zeros(Int64,(N_PORTS, 2)))
@@ -350,24 +350,22 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams)
     # # print(sx, sy, sz,Nx,Ny,Nz,origin)
 
     A, Gamma, ports, lumped_elements, sup_centers, sup_type, bars_Lp_x, bars_Lp_y, bars_Lp_z, diag_R, diag_Cd = generate_interconnection_matrices_and_centers(sx, sy, sz,
-                                                                                                                                                            grids, Nx, Ny, Nz,
-                                                                                                                                                            MATERIALS, PORTS, L_ELEMENTS,
+                                                                                                                                                            grids, Nx, Ny, Nz,                                                                                                                                                      MATERIALS, PORTS, L_ELEMENTS,
                                                                                                                                                             origin)  
     
+                                                                                                                                                            # for k in range(1, stop=size(ports.voxels)[1])
+    #     ports.port_voxels[k,1] = ports.voxels[k,1]
+    #     ports.port_voxels[k,2] = ports.voxels[k, 2]
+    #     ports.port_nodes[k,1] = ports.nodes[k, 1]
+    #     ports.port_nodes[k,2] = ports.nodes[k, 2]
+    # end
 
-    for k in range(1, stop=size(ports.port_voxels)[1])
-        ports.port_voxels[k,1] = ports.port_voxels[k,1]
-        ports.port_voxels[k,2] = ports.port_voxels[k, 2]
-        ports.port_nodes[k,1] = ports.port_nodes[k, 1]
-        ports.port_nodes[k,2] = ports.port_nodes[k, 2]
-    end
-
-    for k in range(1, stop=size(lumped_elements.le_voxels)[1])
-        lumped_elements.le_voxels[k,1]=lumped_elements.le_voxels[k,1]
-        lumped_elements.le_voxels[k, 2] = lumped_elements.le_voxels[k, 2]
-        lumped_elements.le_nodes[k, 1] = lumped_elements.le_nodes[k, 1]
-        lumped_elements.le_nodes[k, 2] = lumped_elements.le_nodes[k, 2]
-    end
+    # for k in range(1, stop=size(lumped_elements.voxels)[1])
+    #     lumped_elements.le_voxels[k,1]=lumped_elements.voxels[k,1]
+    #     lumped_elements.le_voxels[k, 2] = lumped_elements.voxels[k, 2]
+    #     lumped_elements.le_nodes[k, 1] = lumped_elements.nodes[k, 1]
+    #     lumped_elements.le_nodes[k, 2] = lumped_elements.nodes[k, 2]
+    # end
     
     # # print("Time for mesher manipulation and data formatting:", round(time.perf_counter_ns() / 1000 - cpu_time,2))
     
@@ -423,12 +421,12 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams)
     # Lp_x_mat, Lp_y_mat, Lp_z_mat = compute_Lps(bars_Lp_x, bars_Lp_y, bars_Lp_z, sx, sy, sz) 
     # # print("Time for computing Lp with julia:", round(time.perf_counter_ns() / 1000 - cpu_time,2))
 
-    #Z, Y, S = Quasi_static_iterative_solver(frequencies,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,Lp_z_mat,diag_R,diag_Cd,ports,lumped_elements,GMRES_settings)
+    Z, Y, S = Quasi_static_iterative_solver(frequencies,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,Lp_z_mat,diag_R,diag_Cd,ports,lumped_elements,GMRES_settings)
     
     # # Z, Y, S = solver_funcs.Quasi_static_direct_solver(freq,A,Gamma,P_mat,Lp_x_mat,\
     # #     Lp_y_mat,Lp_z_mat,diag_R,diag_Cd,ports,lumped_elements)
     
     # # print("Time for Solver:", round(time.perf_counter_ns() / 1000 - cpu_time,2))
 
-    # return dump_json_data(Z,S,Y) 
+    return diag_R 
 end

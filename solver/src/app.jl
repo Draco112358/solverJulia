@@ -7,8 +7,7 @@ route("/") do
 end
 
 route("/solving", method="POST") do 
-  doSolving(jsonpayload()["mesherOutput"], jsonpayload()["solverInput"], jsonpayload()["solverAlgoParams"])
-  return "test"
+  return JSON.json(doSolving(jsonpayload()["mesherOutput"], jsonpayload()["solverInput"], jsonpayload()["solverAlgoParams"]))
 end
 
 up(8001, async = false)

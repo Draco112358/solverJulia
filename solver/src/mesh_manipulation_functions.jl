@@ -241,7 +241,7 @@ function distfcm(center, data)
         return sum
     end
 
-    out = slicematrix(sum(sum_el, (data .- (ones(size(data)[1],1) .* center)[1][1][1]).^2, dims=2).^0.5)
+    out = slicematrix(sum(sum_el, (data .- (ones(size(data)[1],1) .* center)[1][1]).^2, dims=2).^0.5)
     return out
 end
 
@@ -272,7 +272,9 @@ function find_nodes_port(nodi_centri, port_start, port_end, nodi, nodi_red)
         port_nodes[cont, 2] = bin_search(nodi[port_voxels[cont, 2]],nodi_red)
     end
 
-    return port_voxels,port_nodes
+
+
+    return (port_voxels .- 1),port_nodes
 end
 
 function create_external_grids(matrice,Nx,Ny,Nz)
@@ -488,7 +490,7 @@ function create_A_mats_volInd(matrice,Nx,Ny,Nz,mapping_Vox,mapAx, NAx, mapAy, NA
     vals_A = zeros(Float64, 2*NAx+2*NAy+2*NAz)
     bars_Lp_x = zeros(Float64, NAx, 6)
 
-    num_ele = 1
+    num_ele = 0
 
     for cont2 in range(1, stop=Ny)
         for cont3 in range(1, stop=Nz)
@@ -498,19 +500,19 @@ function create_A_mats_volInd(matrice,Nx,Ny,Nz,mapping_Vox,mapAx, NAx, mapAy, NA
 
                         pos = mapAx[From_3D_to_1D(cont, cont2, cont3, Nx - 1, Ny)] + 1
                         
-                        ind_row[num_ele] = pos
-                        ind_col[num_ele] = bin_search(nodi[mapping_Vox[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]], nodi_red)
+                        ind_row[num_ele+1] = pos
+                        ind_col[num_ele+1] = bin_search(nodi[mapping_Vox[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]], nodi_red)
 
                         bars_Lp_x[pos,1] = min_v[1] + sx * (cont - 1) + sx/2
                         bars_Lp_x[pos,2] = min_v[2] + sy * (cont2 - 1)
                         bars_Lp_x[pos,3] = min_v[3] + sz * (cont3 - 1)
 
-                        vals_A[num_ele] = -1.0
+                        vals_A[num_ele+1] = -1.0
                         num_ele = num_ele + 1
 
-                        ind_row[num_ele] = pos
-                        ind_col[num_ele] = bin_search(nodi[mapping_Vox[From_3D_to_1D(cont+1, cont2, cont3, Nx, Ny)]], nodi_red)
-                        vals_A[num_ele] = 1.0
+                        ind_row[num_ele+1] = pos
+                        ind_col[num_ele+1] = bin_search(nodi[mapping_Vox[From_3D_to_1D(cont+1, cont2, cont3, Nx, Ny)]], nodi_red)
+                        vals_A[num_ele+1] = 1.0
                         num_ele = num_ele + 1
 
                         bars_Lp_x[pos,4] = bars_Lp_x[pos,1] + sx
@@ -530,11 +532,11 @@ function create_A_mats_volInd(matrice,Nx,Ny,Nz,mapping_Vox,mapAx, NAx, mapAy, NA
                             bars_Lp_x[pos,1] = bars_Lp_x[pos,1] - sx / 2.0
                         end
 
-                        if cont + 1 == Nx-1
+                        if cont + 1 == Nx
                             lix_border[pos, 2] = k + 1
                             bars_Lp_x[pos,4] = bars_Lp_x[pos,4] + sx/2.0
                         else
-                            if cont + 2 <= Nx-1
+                            if cont + 2 <= Nx
                                 if (matrice[k][cont+2][cont2][cont3]==0)
                                     lix_border[pos, 2] = k + 1
                                     bars_Lp_x[pos,4] = bars_Lp_x[pos,4] + sx/2.0
@@ -568,18 +570,18 @@ function create_A_mats_volInd(matrice,Nx,Ny,Nz,mapping_Vox,mapAx, NAx, mapAy, NA
                         bars_Lp_y[pos,2] = min_v[2] + sy * (cont2 - 1) + sy/2
                         bars_Lp_y[pos,3] = min_v[3] + sz * (cont3 - 1)
 
-                        ind_row[starter+num_ele] = pos+NAx
-                        ind_col[starter+num_ele] = bin_search(nodi[mapping_Vox[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]], nodi_red)
-                        vals_A[starter+num_ele] = -1.0
+                        ind_row[starter+num_ele+1] = pos+NAx
+                        ind_col[starter+num_ele+1] = bin_search(nodi[mapping_Vox[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]], nodi_red)
+                        vals_A[starter+num_ele+1] = -1.0
                         num_ele = num_ele + 1
 
                         bars_Lp_y[pos,4] = bars_Lp_y[pos,1] + sx
                         bars_Lp_y[pos,5] = bars_Lp_y[pos,2] + sy
                         bars_Lp_y[pos,6] = bars_Lp_y[pos,3] + sz
 
-                        ind_row[starter+num_ele] = pos+NAx
-                        ind_col[starter+num_ele] = bin_search(nodi[mapping_Vox[From_3D_to_1D(cont, cont2+1, cont3, Nx, Ny)]], nodi_red)
-                        vals_A[starter+num_ele] = 1.0
+                        ind_row[starter+num_ele+1] = pos+NAx
+                        ind_col[starter+num_ele+1] = bin_search(nodi[mapping_Vox[From_3D_to_1D(cont, cont2+1, cont3, Nx, Ny)]], nodi_red)
+                        vals_A[starter+num_ele+1] = 1.0
                         num_ele = num_ele + 1
 
                         liy_mat[pos, 1] = k+1
@@ -595,11 +597,11 @@ function create_A_mats_volInd(matrice,Nx,Ny,Nz,mapping_Vox,mapAx, NAx, mapAy, NA
                             bars_Lp_y[pos,2] = bars_Lp_y[pos,2] - sy / 2.0
                         end
 
-                        if cont2 + 1 == Ny-1
+                        if cont2 + 1 == Ny
                             liy_border[pos, 2] = k + 1
                             bars_Lp_y[pos,5] = bars_Lp_y[pos,5] + sy / 2.0
                         else
-                            if cont2 + 2 <= Ny-1
+                            if cont2 + 2 <= Ny
                                 if (matrice[k][cont][cont2+2][cont3]==0)
                                     liy_border[pos, 2] = k + 1
                                     bars_Lp_y[pos,5] = bars_Lp_y[pos,5] + sy / 2.0
@@ -633,18 +635,18 @@ function create_A_mats_volInd(matrice,Nx,Ny,Nz,mapping_Vox,mapAx, NAx, mapAy, NA
                         bars_Lp_z[pos,2] = min_v[2] + sy * (cont2 - 1)
                         bars_Lp_z[pos,3] = min_v[3] + sz * (cont3 - 1) + sz/2
 
-                        ind_row[starter+num_ele] = pos+NAx+NAy
-                        ind_col[starter+num_ele] = bin_search(nodi[mapping_Vox[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]], nodi_red)
-                        vals_A[starter+num_ele] = -1.0
+                        ind_row[starter+num_ele+1] = pos+NAx+NAy
+                        ind_col[starter+num_ele+1] = bin_search(nodi[mapping_Vox[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]], nodi_red)
+                        vals_A[starter+num_ele+1] = -1.0
                         num_ele = num_ele + 1
 
                         bars_Lp_z[pos,4] = bars_Lp_z[pos,1] + sx
                         bars_Lp_z[pos,5] = bars_Lp_z[pos,2] + sy
                         bars_Lp_z[pos,6] = bars_Lp_z[pos,3] + sz
 
-                        ind_row[starter+num_ele] = pos+NAx+NAy
-                        ind_col[starter+num_ele] = bin_search(nodi[mapping_Vox[From_3D_to_1D(cont, cont2, cont3+1, Nx, Ny)]], nodi_red)
-                        vals_A[starter+num_ele] = 1.0
+                        ind_row[starter+num_ele+1] = pos+NAx+NAy
+                        ind_col[starter+num_ele+1] = bin_search(nodi[mapping_Vox[From_3D_to_1D(cont, cont2, cont3+1, Nx, Ny)]], nodi_red)
+                        vals_A[starter+num_ele+1] = 1.0
                         num_ele = num_ele + 1
 
                         liz_mat[pos, 1] = k+1
@@ -660,11 +662,11 @@ function create_A_mats_volInd(matrice,Nx,Ny,Nz,mapping_Vox,mapAx, NAx, mapAy, NA
                             bars_Lp_z[pos,3] = bars_Lp_z[pos,3] - sz / 2.0
                         end
 
-                        if cont3 + 1 == Nz-1
+                        if cont3 + 1 == Nz
                             liz_border[pos, 2] = k + 1
                             bars_Lp_z[pos,6] = bars_Lp_z[pos,6] + sz / 2.0
                         else
-                            if cont3 + 2 <= Nz-1
+                            if cont3 + 2 <= Nz
                                 if (matrice[k][cont][cont2][cont3+2]==0)
                                     liz_border[pos, 2] = k + 1
                                     bars_Lp_z[pos,6] = bars_Lp_z[pos,6] + sz / 2.0
@@ -683,11 +685,7 @@ function create_A_mats_volInd(matrice,Nx,Ny,Nz,mapping_Vox,mapAx, NAx, mapAy, NA
 end
 
 function ver_con(A,B)
-    if ((typeof(A) == Vector{Vector{Int}} && typeof(B) == Vector{Vector{Int}}) || (typeof(A) == Vector{Vector{Float64}} && typeof(B) == Vector{Vector{Float64}}))
-        return vcat(A,B)
-    else
-        return [A,B]
-    end
+    return vcat(A,B)
 end
 
 function vect_con(A,B)
@@ -736,92 +734,93 @@ function compute_diagonals(MATER,sx,sy,sz,lix_mat,liy_mat,liz_mat,lix_border,liy
 
     for cont in range(1, stop=num_grids)
         if MATER[cont].Rx!=0
-            ind_m = findall((cont+1) == lix_mat[:, 1])
-            ind_m = filter(i -> !iszero(ind_m[i]), ind_m)
+            ind_m = findall(l -> (cont+1) == l, lix_mat[:, 1])
+            #ind_m = filter(i -> i!=1, ind_m)
             Rx[ind_m, 1] .= MATER[cont].Rx
-            ind_m = findall((cont+1) == lix_mat[:, 2])
-            ind_m = filter(i -> !iszero(ind_m[i]), ind_m)
+            ind_m = findall(l -> (cont+1) == l, lix_mat[:, 2])
+            #ind_m = filter(i -> i!=1, ind_m)
             Rx[ind_m, 2] .= MATER[cont].Rx
-            ind_m = findall((cont+1) == lix_border[:, 1])
-            ind_m = filter(i -> !iszero(ind_m[i]), ind_m)
+            ind_m = findall(l -> (cont+1) == l, lix_border[:, 1])
+            #ind_m = filter(i -> i!=1, ind_m)
             Rx[ind_m, 3] .= MATER[cont].Rx
-            ind_m = findall((cont+1) == lix_border[:, 2])
-            ind_m = filter(i -> !iszero(ind_m[i]), ind_m)
+            ind_m = findall(l -> (cont+1) == l, lix_border[:, 2])
+            #ind_m = filter(i -> i!=1, ind_m)
             Rx[ind_m, 4] .= MATER[cont].Rx
         end
         if MATER[cont].Cx!=0
-            ind_m = findall((cont+1) == lix_mat[:, 1])
-            ind_m = filter(i -> !iszero(ind_m[i]), ind_m)
+            ind_m = findall(l -> (cont+1) == l, lix_mat[:, 1])
+            #ind_m = filter(i -> i!=1, ind_m)
             Cx[ind_m, 1] .= MATER[cont].Cx
-            ind_m = findall((cont+1) == lix_mat[:, 2])
-            ind_m = filter(i -> !iszero(ind_m[i]), ind_m)
+            ind_m = findall(l -> (cont+1) == l, lix_mat[:, 2])
+            #ind_m = filter(i -> i!=1, ind_m)
             Cx[ind_m, 2] .= MATER[cont].Cx
-            ind_m = findall((cont+1) == lix_border[:, 1])
-            ind_m = filter(i -> !iszero(ind_m[i]), ind_m)
+            ind_m = findall(l -> (cont+1) == l, lix_border[:, 1])
+            #ind_m = filter(i -> i!=1, ind_m)
             Cx[ind_m, 3] .= MATER[cont].Cx
-            ind_m = findall((cont+1) == lix_border[:, 2])
-            ind_m = filter(i -> !iszero(ind_m[i]), ind_m)
+            ind_m = findall(l -> (cont+1) == l, lix_border[:, 2])
+            #ind_m = filter(i -> i!=1, ind_m)
             Cx[ind_m, 4] .= MATER[cont].Cx
         end
         if MATER[cont].Ry!=0
-            ind_m = findall((cont+1) == liy_mat[:, 1])
-            ind_m = filter(i -> !iszero(ind_m[i]), ind_m)
+            ind_m = findall(l -> (cont+1) == l, liy_mat[:, 1])
+            #ind_m = filter(i -> i!=1, ind_m)
             Ry[ind_m, 1] .= MATER[cont].Ry
-            ind_m = findall((cont+1) == liy_mat[:, 2])
-            ind_m = filter(i -> !iszero(ind_m[i]), ind_m)
+            ind_m = findall(l -> (cont+1) == l, liy_mat[:, 2])
+            #ind_m = filter(i -> i!=1, ind_m)
             Ry[ind_m, 2] .= MATER[cont].Ry
-            ind_m = findall((cont+1) == liy_border[:, 1])
-            ind_m = filter(i -> !iszero(ind_m[i]), ind_m)
+            ind_m = findall(l -> (cont+1) == l, liy_border[:, 1])
+            #ind_m = filter(i -> i!=1, ind_m)
             Ry[ind_m, 3] .= MATER[cont].Ry
-            ind_m = findall((cont+1) == liy_border[:, 2])
-            ind_m = filter(i -> !iszero(ind_m[i]), ind_m)
+            ind_m = findall(l -> (cont+1) == l, liy_border[:, 2])
+            #ind_m = filter(i -> i!=1, ind_m)
             Ry[ind_m, 4] .= MATER[cont].Ry
         end
         if MATER[cont].Cy!=0
-            ind_m = findall((cont+1) == liy_mat[:, 1])
-            ind_m = filter(i -> !iszero(ind_m[i]), ind_m)
+            ind_m = findall(l -> (cont+1) == l, liy_mat[:, 1])
+            #ind_m = filter(i -> i!=1, ind_m)
             Cy[ind_m, 1] .= MATER[cont].Cy
-            ind_m = findall((cont+1) == liy_mat[:, 2])
-            ind_m = filter(i -> !iszero(ind_m[i]), ind_m)
+            ind_m = findall(l -> (cont+1) == l, liy_mat[:, 2])
+            #ind_m = filter(i -> i!=1, ind_m)
             Cy[ind_m, 2] .= MATER[cont].Cy
-            ind_m = findall((cont+1) == liy_border[:, 1])
-            ind_m = filter(i -> !iszero(ind_m[i]), ind_m)
+            ind_m = findall(l -> (cont+1) == l, liy_border[:, 1])
+            #ind_m = filter(i -> i!=1, ind_m)
             Cy[ind_m, 3] .= MATER[cont].Cy
-            ind_m = findall((cont+1) == liy_border[:, 2])
-            ind_m = filter(i -> !iszero(ind_m[i]), ind_m)
+            ind_m = findall(l -> (cont+1) == l, liy_border[:, 2])
+            #ind_m = filter(i -> i!=1, ind_m)
             Cy[ind_m, 4] .= MATER[cont].Cy
         end
         if MATER[cont].Rz!=0
-            ind_m = findall((cont+1) == liz_mat[:, 1])
-            ind_m = filter(i -> !iszero(ind_m[i]), ind_m)
+            ind_m = findall(l -> (cont+1) == l, liz_mat[:, 1])
+            #ind_m = filter(i -> i!=1, ind_m)
             Rz[ind_m, 1] .= MATER[cont].Rz
-            ind_m = findall((cont+1) == liz_mat[:, 2])
-            ind_m = filter(i -> !iszero(ind_m[i]), ind_m)
+            ind_m = findall(l -> (cont+1) == l, liz_mat[:, 2])
+            #ind_m = filter(i -> i!=1, ind_m)
             Rz[ind_m, 2] .= MATER[cont].Rz
-            ind_m = findall((cont+1) == liz_border[:, 1])
-            ind_m = filter(i -> !iszero(ind_m[i]), ind_m)
+            ind_m = findall(l -> (cont+1) == l, liz_border[:, 1])
+            #ind_m = filter(i -> i!=1, ind_m)
             Rz[ind_m, 3] .= MATER[cont].Rz
-            ind_m = findall((cont+1) == liz_border[:, 2])
-            ind_m = filter(i -> !iszero(ind_m[i]), ind_m)
+            ind_m = findall(l -> (cont+1) == l, liz_border[:, 2])
+            #ind_m = filter(i -> i!=1, ind_m)
             Rz[ind_m, 4] .= MATER[cont].Rz
         end
         if MATER[cont].Cz!=0
-            ind_m = findall((cont+1) == liz_mat[:, 1])
-            ind_m = filter(i -> !iszero(ind_m[i]), ind_m)
+            ind_m = findall(l -> (cont+1) == l, liz_mat[:, 1])
+            #ind_m = filter(i -> i!=1, ind_m)
             Cz[ind_m, 1] .= MATER[cont].Cz
-            ind_m = findall((cont+1) == liz_mat[:, 2])
-            ind_m = filter(i -> !iszero(ind_m[i]), ind_m)
+            ind_m = findall(l -> (cont+1) == l, liz_mat[:, 2])
+            #ind_m = filter(i -> i!=1, ind_m)
             Cz[ind_m, 2] .= MATER[cont].Cz
-            ind_m = findall((cont+1) == liz_border[:, 1])
-            ind_m = filter(i -> !iszero(ind_m[i]), ind_m)
+            ind_m = findall(l -> (cont+1) == l, liz_border[:, 1])
+            #ind_m = filter(i -> i!=1, ind_m)
             Cz[ind_m, 3] .= MATER[cont].Cz
-            ind_m = findall((cont+1) == liz_border[:, 2])
-            ind_m = filter(i -> !iszero(ind_m[i]), ind_m)
+            ind_m = findall(l -> (cont+1) == l, liz_border[:, 2])
+            #ind_m = filter(i -> i!=1, ind_m)
             Cz[ind_m, 4] .= MATER[cont].Cz
         end
     end
     diag_R = ver_con(ver_con(Rx, Ry), Rz)
     diag_Cd = ver_con(ver_con(Cx, Cy), Cz)
+
 
     return diag_R, diag_Cd
 end
@@ -1199,7 +1198,6 @@ function generate_interconnection_matrices_and_centers(size_x,size_y,size_z,grid
     port_matrix.port_voxels, port_matrix.port_nodes = find_nodes_port(volume_centers, port_matrix.port_start, port_matrix.port_end, nodes, nodes_red)
         
 
-
     lumped_el_matrix.le_voxels, lumped_el_matrix.le_nodes = find_nodes_port(volume_centers,lumped_el_matrix.le_start,lumped_el_matrix.le_end, nodes, nodes_red)
 
 
@@ -1217,7 +1215,7 @@ function generate_interconnection_matrices_and_centers(size_x,size_y,size_z,grid
                                        map_for_Ax, n_for_Ax, map_for_Ay, n_for_Ay, map_for_Az, n_for_Az,
                                        size_x,size_y,size_z,minimum_vertex,nodes,nodes_red)
 
-    A = sparse(ind_row .+ 1, ind_col .+ 1, vals_A)
+    A = sparse(ind_row, ind_col .+ 1, vals_A)
 
     println("Edges without air:", n_for_Ax+n_for_Ay+n_for_Az)
     println("Nodes without air:", size(Gamma)[1])
