@@ -7,20 +7,20 @@ end
 
 function bin_search(num, A)
 
-    index = 0
+    index = 1
     n = size(A)[1]
-    left = 0
-    right = n-1
+    left = 1
+    right = n
 
     while left <= right
         mid = ceil(Int, (left + right) / 2)
         #mid = Int64((left + right) / 2)
 
-        if A[mid+1] == num
+        if A[mid] == num
             index = mid
             break
         else
-            if A[mid+1] > num
+            if A[mid] > num
                 right = mid - 1
             else
                 left = mid + 1
@@ -274,7 +274,7 @@ function find_nodes_port(nodi_centri, port_start, port_end, nodi, nodi_red)
 
 
 
-    return port_voxels,port_nodes
+    return port_voxels, port_nodes
 end
 
 function create_external_grids(matrice,Nx,Ny,Nz)
@@ -842,8 +842,8 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
     num_ele_6 = 0
 
     nnz_surf_max = 6 * Nx * Ny * Nz
-    ind_r = zeros(Int64, nnz_surf_max)
-    ind_c = zeros(Int64, nnz_surf_max)
+    ind_r = ones(Int64, nnz_surf_max)
+    ind_c = ones(Int64, nnz_surf_max)
 
     sup_centers = zeros(Float64, nnz_surf_max,3)
     sup_type = zeros(Int64, nnz_surf_max)
@@ -859,14 +859,14 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
                 if ((matrice[k][cont][cont2][cont3]==1) && (ext_grids[k,2,cont,cont2,cont3]==0))
                     num_ele_1 = num_ele_1 + 1
                     p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny)
-                    mapping_surf_1[p31] = num_ele_1-1
+                    mapping_surf_1[p31] = num_ele_1
                     contat_tot = contat_tot + 1
-                    ind_r[contat_tot - 1] = bin_search(nodi[map_volumes[p31]], nodi_red)
-                    ind_c[contat_tot - 1] = num_ele_1-1
-                    sup_centers[ind_c[contat_tot - 1]+1, 1] = min_v[1] + sx * (cont - 1)  + sx / 2.0
-                    sup_centers[ind_c[contat_tot - 1]+1, 2] = min_v[2] + sy * (cont2 - 1)
-                    sup_centers[ind_c[contat_tot - 1]+1, 3] = min_v[3] + sz * (cont3 - 1) + sz / 2.0
-                    sup_type[ind_c[contat_tot - 1]+1] = 1
+                    ind_r[contat_tot] = bin_search(nodi[map_volumes[p31]], nodi_red)
+                    ind_c[contat_tot] = num_ele_1
+                    sup_centers[ind_c[contat_tot-1], 1] = min_v[1] + sx * (cont - 1)  + sx / 2.0
+                    sup_centers[ind_c[contat_tot-1], 2] = min_v[2] + sy * (cont2 - 1)
+                    sup_centers[ind_c[contat_tot-1], 3] = min_v[3] + sz * (cont3 - 1) + sz / 2.0
+                    sup_type[ind_c[contat_tot]] = 1
                     break
                 end
             end
@@ -880,14 +880,14 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
                     if ((matrice[k][cont][cont2][cont3]==1) && (matrice[k][cont][cont2-1][cont3]==0) && (ext_grids[k,2,cont,cont2,cont3]==0))
                         num_ele_1 = num_ele_1 + 1
                         p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny)
-                        mapping_surf_1[p31] = num_ele_1 - 1
+                        mapping_surf_1[p31] = num_ele_1
                         contat_tot = contat_tot + 1
-                        ind_r[contat_tot - 1] = bin_search(nodi[map_volumes[p31]], nodi_red)
-                        ind_c[contat_tot - 1] = num_ele_1 - 1
-                        sup_centers[ind_c[contat_tot - 1]+1, 1] = min_v[1] + sx * (cont - 1) + sx / 2.0
-                        sup_centers[ind_c[contat_tot - 1]+1, 2] = min_v[2] + sy * (cont2 - 1)
-                        sup_centers[ind_c[contat_tot - 1]+1, 3] = min_v[3] + sz * (cont3 - 1) + sz / 2.0
-                        sup_type[ind_c[contat_tot - 1]+1] = 1
+                        ind_r[contat_tot] = bin_search(nodi[map_volumes[p31]], nodi_red)
+                        ind_c[contat_tot] = num_ele_1
+                        sup_centers[ind_c[contat_tot-1], 1] = min_v[1] + sx * (cont - 1) + sx / 2.0
+                        sup_centers[ind_c[contat_tot-1], 2] = min_v[2] + sy * (cont2 - 1)
+                        sup_centers[ind_c[contat_tot-1], 3] = min_v[3] + sz * (cont3 - 1) + sz / 2.0
+                        sup_type[ind_c[contat_tot]] = 1
                         break
                     end
                 end
@@ -902,14 +902,14 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
                 if ((matrice[k][cont][cont2][cont3] == 1) && (ext_grids[k,1,cont,cont2,cont3] == 0))
                     num_ele_2 = num_ele_2 + 1
                     p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny)
-                    mapping_surf_2[p31] = num_ele_2 - 1
+                    mapping_surf_2[p31] = num_ele_2
                     contat_tot = contat_tot + 1
-                    ind_r[contat_tot - 1] = bin_search(nodi[map_volumes[p31]], nodi_red)
-                    ind_c[contat_tot - 1] = num_ele_1 + num_ele_2 - 1
-                    sup_centers[ind_c[contat_tot - 1]+1, 1] = min_v[1] + sx * (cont - 1) + sx / 2.0
-                    sup_centers[ind_c[contat_tot - 1]+1, 2] = min_v[2] + sy * (cont2 - 1) + sy
-                    sup_centers[ind_c[contat_tot - 1]+1, 3] = min_v[3] + sz * (cont3 - 1) + sz / 2.0
-                    sup_type[ind_c[contat_tot - 1]+1] = 1
+                    ind_r[contat_tot] = bin_search(nodi[map_volumes[p31]], nodi_red)
+                    ind_c[contat_tot] = num_ele_1 + num_ele_2
+                    sup_centers[ind_c[contat_tot-1], 1] = min_v[1] + sx * (cont - 1) + sx / 2.0
+                    sup_centers[ind_c[contat_tot-1], 2] = min_v[2] + sy * (cont2 - 1) + sy
+                    sup_centers[ind_c[contat_tot-1], 3] = min_v[3] + sz * (cont3 - 1) + sz / 2.0
+                    sup_type[ind_c[contat_tot]] = 1
                     break
                 end
             end
@@ -934,14 +934,14 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
                         if (check_others == false)
                             num_ele_2 = num_ele_2 + 1
                             p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny)
-                            mapping_surf_2[p31] = num_ele_2 - 1
+                            mapping_surf_2[p31] = num_ele_2
                             contat_tot = contat_tot + 1
-                            ind_r[contat_tot - 1] = bin_search(nodi[map_volumes[p31]], nodi_red)
-                            ind_c[contat_tot - 1] = num_ele_1 + num_ele_2 - 1
-                            sup_centers[ind_c[contat_tot - 1]+1, 1] = min_v[1] + sx * (cont - 1) + sx / 2.0
-                            sup_centers[ind_c[contat_tot - 1]+1, 2] = min_v[2] + sy * (cont2 - 1) + sy
-                            sup_centers[ind_c[contat_tot - 1]+1, 3] = min_v[3] + sz * (cont3 - 1) + sz / 2.0
-                            sup_type[ind_c[contat_tot - 1]+1] = 1
+                            ind_r[contat_tot] = bin_search(nodi[map_volumes[p31]], nodi_red)
+                            ind_c[contat_tot] = num_ele_1 + num_ele_2
+                            sup_centers[ind_c[contat_tot-1], 1] = min_v[1] + sx * (cont - 1) + sx / 2.0
+                            sup_centers[ind_c[contat_tot-1], 2] = min_v[2] + sy * (cont2 - 1) + sy
+                            sup_centers[ind_c[contat_tot-1], 3] = min_v[3] + sz * (cont3 - 1) + sz / 2.0
+                            sup_type[ind_c[contat_tot]] = 1
                         end
                         break
                     end
@@ -958,14 +958,14 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
                 if ((matrice[k][cont][cont2][cont3] == 1) && (ext_grids[k,4,cont,cont2,cont3] == 0))
                     num_ele_3 = num_ele_3 + 1
                     p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny)
-                    mapping_surf_3[p31] = num_ele_3 - 1
+                    mapping_surf_3[p31] = num_ele_3
                     contat_tot = contat_tot + 1
-                    ind_r[contat_tot - 1] = bin_search(nodi[map_volumes[p31]], nodi_red)
-                    ind_c[contat_tot - 1] = num_ele_1 + num_ele_2 + num_ele_3 - 1
-                    sup_centers[ind_c[contat_tot - 1]+1, 1] = min_v[1] + sx * (cont - 1)
-                    sup_centers[ind_c[contat_tot - 1]+1, 2] = min_v[2] + sy * (cont2 - 1) + sy / 2.0
-                    sup_centers[ind_c[contat_tot - 1]+1, 3] = min_v[3] + sz * (cont3 - 1) + sz / 2.0
-                    sup_type[ind_c[contat_tot - 1]+1] = 2
+                    ind_r[contat_tot] = bin_search(nodi[map_volumes[p31]], nodi_red)
+                    ind_c[contat_tot] = num_ele_1 + num_ele_2 + num_ele_3
+                    sup_centers[ind_c[contat_tot-1], 1] = min_v[1] + sx * (cont - 1)
+                    sup_centers[ind_c[contat_tot-1], 2] = min_v[2] + sy * (cont2 - 1) + sy / 2.0
+                    sup_centers[ind_c[contat_tot-1], 3] = min_v[3] + sz * (cont3 - 1) + sz / 2.0
+                    sup_type[ind_c[contat_tot]] = 2
                     break
                 end
             end
@@ -979,14 +979,14 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
                     if ((matrice[k][cont][cont2][cont3]==1) && (matrice[k][cont-1][cont2][cont3]==0) && (ext_grids[k,4,cont,cont2,cont3]==0))
                         num_ele_3 = num_ele_3 + 1
                         p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny)
-                        mapping_surf_3[p31] = num_ele_3 - 1
+                        mapping_surf_3[p31] = num_ele_3
                         contat_tot = contat_tot + 1
-                        ind_r[contat_tot - 1] = bin_search(nodi[map_volumes[p31]], nodi_red)
-                        ind_c[contat_tot - 1] = num_ele_1 + num_ele_2 + num_ele_3 - 1
-                        sup_centers[ind_c[contat_tot - 1]+1, 1] = min_v[1] + sx * (cont - 1)
-                        sup_centers[ind_c[contat_tot - 1]+1, 2] = min_v[2] + sy * (cont2 - 1) + sy / 2.0
-                        sup_centers[ind_c[contat_tot - 1]+1, 3] = min_v[3] + sz * (cont3 - 1) + sz / 2.0
-                        sup_type[ind_c[contat_tot - 1]+1] = 2
+                        ind_r[contat_tot] = bin_search(nodi[map_volumes[p31]], nodi_red)
+                        ind_c[contat_tot] = num_ele_1 + num_ele_2 + num_ele_3
+                        sup_centers[ind_c[contat_tot-1], 1] = min_v[1] + sx * (cont - 1)
+                        sup_centers[ind_c[contat_tot-1], 2] = min_v[2] + sy * (cont2 - 1) + sy / 2.0
+                        sup_centers[ind_c[contat_tot-1], 3] = min_v[3] + sz * (cont3 - 1) + sz / 2.0
+                        sup_type[ind_c[contat_tot]] = 2
                         break
                     end
                 end
@@ -1001,14 +1001,14 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
                 if ((matrice[k][cont][cont2][cont3] == 1) && (ext_grids[k,3,cont,cont2,cont3] == 0))
                     num_ele_4 = num_ele_4 + 1
                     p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny)
-                    mapping_surf_4[p31] = num_ele_4 - 1
+                    mapping_surf_4[p31] = num_ele_4
                     contat_tot = contat_tot + 1
-                    ind_r[contat_tot - 1] = bin_search(nodi[map_volumes[p31]], nodi_red)
-                    ind_c[contat_tot - 1] = num_ele_1 + num_ele_2 + num_ele_3 + num_ele_4 - 1
-                    sup_centers[ind_c[contat_tot - 1]+1, 1] = min_v[1] + sx * (cont - 1) + sx
-                    sup_centers[ind_c[contat_tot - 1]+1, 2] = min_v[2] + sy * (cont2 - 1) + sy / 2.0
-                    sup_centers[ind_c[contat_tot - 1]+1, 3] = min_v[3] + sz * (cont3 - 1) + sz / 2.0
-                    sup_type[ind_c[contat_tot - 1]+1] = 2
+                    ind_r[contat_tot] = bin_search(nodi[map_volumes[p31]], nodi_red)
+                    ind_c[contat_tot] = num_ele_1 + num_ele_2 + num_ele_3 + num_ele_4
+                    sup_centers[ind_c[contat_tot-1], 1] = min_v[1] + sx * (cont - 1) + sx
+                    sup_centers[ind_c[contat_tot-1], 2] = min_v[2] + sy * (cont2 - 1) + sy / 2.0
+                    sup_centers[ind_c[contat_tot-1], 3] = min_v[3] + sz * (cont3 - 1) + sz / 2.0
+                    sup_type[ind_c[contat_tot]] = 2
                     break
                 end
             end
@@ -1033,14 +1033,14 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
                         if (check_others == false)
                             num_ele_4 = num_ele_4 + 1
                             p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny)
-                            mapping_surf_4[p31] = num_ele_4 - 1
+                            mapping_surf_4[p31] = num_ele_4
                             contat_tot = contat_tot + 1
-                            ind_r[contat_tot - 1] = bin_search(nodi[map_volumes[p31]], nodi_red)
-                            ind_c[contat_tot - 1] = num_ele_1 + num_ele_2 + num_ele_3 + num_ele_4 - 1
-                            sup_centers[ind_c[contat_tot - 1]+1, 1] = min_v[1] + sx * (cont - 1) + sx
-                            sup_centers[ind_c[contat_tot - 1]+1, 2] = min_v[2] + sy * (cont2 - 1) + sy / 2.0
-                            sup_centers[ind_c[contat_tot - 1]+1, 3] = min_v[3] + sz * (cont3 - 1) + sz / 2.0
-                            sup_type[ind_c[contat_tot - 1]+1] = 2
+                            ind_r[contat_tot] = bin_search(nodi[map_volumes[p31]], nodi_red)
+                            ind_c[contat_tot] = num_ele_1 + num_ele_2 + num_ele_3 + num_ele_4
+                            sup_centers[ind_c[contat_tot-1], 1] = min_v[1] + sx * (cont - 1) + sx
+                            sup_centers[ind_c[contat_tot-1], 2] = min_v[2] + sy * (cont2 - 1) + sy / 2.0
+                            sup_centers[ind_c[contat_tot-1], 3] = min_v[3] + sz * (cont3 - 1) + sz / 2.0
+                            sup_type[ind_c[contat_tot]] = 2
                         end
                         break
                     end
@@ -1058,14 +1058,14 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
                 if ((matrice[k][cont][cont2][cont3] == 1) && (ext_grids[k,6,cont,cont2,cont3] == 0))
                     num_ele_5 = num_ele_5 + 1
                     p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny)
-                    mapping_surf_5[p31] = num_ele_5 - 1
+                    mapping_surf_5[p31] = num_ele_5
                     contat_tot = contat_tot + 1
-                    ind_r[contat_tot - 1] = bin_search(nodi[map_volumes[p31]], nodi_red)
-                    ind_c[contat_tot - 1] = num_ele_1 + num_ele_2 + num_ele_3 + num_ele_4 + num_ele_5 - 1
-                    sup_centers[ind_c[contat_tot - 1]+1, 1] = min_v[1] + sx * (cont - 1) + sx / 2.0
-                    sup_centers[ind_c[contat_tot - 1]+1, 2] = min_v[2] + sy * (cont2 - 1) + sy / 2.0
-                    sup_centers[ind_c[contat_tot - 1]+1, 3] = min_v[3] + sz * (cont3 - 1)
-                    sup_type[ind_c[contat_tot - 1]+1] = 3
+                    ind_r[contat_tot] = bin_search(nodi[map_volumes[p31]], nodi_red)
+                    ind_c[contat_tot] = num_ele_1 + num_ele_2 + num_ele_3 + num_ele_4 + num_ele_5
+                    sup_centers[ind_c[contat_tot-1], 1] = min_v[1] + sx * (cont - 1) + sx / 2.0
+                    sup_centers[ind_c[contat_tot-1], 2] = min_v[2] + sy * (cont2 - 1) + sy / 2.0
+                    sup_centers[ind_c[contat_tot-1], 3] = min_v[3] + sz * (cont3 - 1)
+                    sup_type[ind_c[contat_tot]] = 3
                     break
                 end
             end
@@ -1079,14 +1079,14 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
                     if ((matrice[k][cont][cont2][cont3]==1) && (matrice[k][cont][cont2][cont3-1]==0) && (ext_grids[k,6,cont,cont2,cont3]==0))
                         num_ele_5 = num_ele_5 + 1
                         p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny)
-                        mapping_surf_5[p31] = num_ele_5 - 1
+                        mapping_surf_5[p31] = num_ele_5
                         contat_tot = contat_tot + 1
-                        ind_r[contat_tot - 1] = bin_search(nodi[map_volumes[p31]], nodi_red)
-                        ind_c[contat_tot - 1] = num_ele_1 + num_ele_2 + num_ele_3 + num_ele_4 + num_ele_5 - 1
-                        sup_centers[ind_c[contat_tot - 1]+1, 1] = min_v[1] + sx * (cont - 1) + sx / 2.0
-                        sup_centers[ind_c[contat_tot - 1]+1, 2] = min_v[2] + sy * (cont2 - 1) + sy / 2.0
-                        sup_centers[ind_c[contat_tot - 1]+1, 3] = min_v[3] + sz * (cont3 - 1)
-                        sup_type[ind_c[contat_tot - 1]+1] = 3
+                        ind_r[contat_tot] = bin_search(nodi[map_volumes[p31]], nodi_red)
+                        ind_c[contat_tot] = num_ele_1 + num_ele_2 + num_ele_3 + num_ele_4 + num_ele_5
+                        sup_centers[ind_c[contat_tot-1], 1] = min_v[1] + sx * (cont - 1) + sx / 2.0
+                        sup_centers[ind_c[contat_tot-1], 2] = min_v[2] + sy * (cont2 - 1) + sy / 2.0
+                        sup_centers[ind_c[contat_tot-1], 3] = min_v[3] + sz * (cont3 - 1)
+                        sup_type[ind_c[contat_tot]] = 3
                         break
                     end
                 end
@@ -1101,14 +1101,14 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
                 if ((matrice[k][cont][cont2][cont3] == 1) && (ext_grids[k,5,cont,cont2,cont3] == 0))
                     num_ele_6 = num_ele_6 + 1
                     p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny)
-                    mapping_surf_6[p31] = num_ele_6 - 1
+                    mapping_surf_6[p31] = num_ele_6
                     contat_tot = contat_tot + 1
-                    ind_r[contat_tot - 1] = bin_search(nodi[map_volumes[p31]], nodi_red)
-                    ind_c[contat_tot - 1] = num_ele_1 + num_ele_2 + num_ele_3 + num_ele_4 + num_ele_5 + num_ele_6 - 1
-                    sup_centers[ind_c[contat_tot - 1]+1, 1] = min_v[1] + sx * (cont - 1) + sx / 2.0
-                    sup_centers[ind_c[contat_tot - 1]+1, 2] = min_v[2] + sy * (cont2 - 1) + sy / 2.0
-                    sup_centers[ind_c[contat_tot - 1]+1, 3] = min_v[3] + sz * (cont3 - 1) + sz
-                    sup_type[ind_c[contat_tot - 1]+1] = 3
+                    ind_r[contat_tot] = bin_search(nodi[map_volumes[p31]], nodi_red)
+                    ind_c[contat_tot] = num_ele_1 + num_ele_2 + num_ele_3 + num_ele_4 + num_ele_5 + num_ele_6
+                    sup_centers[ind_c[contat_tot-1], 1] = min_v[1] + sx * (cont - 1) + sx / 2.0
+                    sup_centers[ind_c[contat_tot-1], 2] = min_v[2] + sy * (cont2 - 1) + sy / 2.0
+                    sup_centers[ind_c[contat_tot-1], 3] = min_v[3] + sz * (cont3 - 1) + sz
+                    sup_type[ind_c[contat_tot]] = 3
                     break
                 end
             end
@@ -1133,14 +1133,14 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
                         if (check_others==false)
                             num_ele_6 = num_ele_6 + 1
                             p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny)
-                            mapping_surf_6[p31] = num_ele_6 - 1
+                            mapping_surf_6[p31] = num_ele_6
                             contat_tot = contat_tot + 1
-                            ind_r[contat_tot - 1] = bin_search(nodi[map_volumes[p31]], nodi_red)
-                            ind_c[contat_tot - 1] = num_ele_1 + num_ele_2 + num_ele_3 + num_ele_4 + num_ele_5 + num_ele_6 - 1
-                            sup_centers[ind_c[contat_tot - 1]+1, 1] = min_v[1] + sx * (cont - 1) + sx / 2.0
-                            sup_centers[ind_c[contat_tot - 1]+1, 2] = min_v[2] + sy * (cont2 - 1) + sy / 2.0
-                            sup_centers[ind_c[contat_tot - 1]+1, 3] = min_v[3] + sz * (cont3 - 1) + sz
-                            sup_type[ind_c[contat_tot - 1]+1] = 3
+                            ind_r[contat_tot] = bin_search(nodi[map_volumes[p31]], nodi_red)
+                            ind_c[contat_tot] = num_ele_1 + num_ele_2 + num_ele_3 + num_ele_4 + num_ele_5 + num_ele_6
+                            sup_centers[ind_c[contat_tot-1], 1] = min_v[1] + sx * (cont - 1) + sx / 2.0
+                            sup_centers[ind_c[contat_tot-1], 2] = min_v[2] + sy * (cont2 - 1) + sy / 2.0
+                            sup_centers[ind_c[contat_tot-1], 3] = min_v[3] + sz * (cont3 - 1) + sz
+                            sup_type[ind_c[contat_tot]] = 3
                         end
                         break
                     end
@@ -1150,9 +1150,9 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
     end
 
     nnz_surf = num_ele_1 + num_ele_2 + num_ele_3 + num_ele_4 + num_ele_5 + num_ele_6
-    vals = ones(Float64, contat_tot-1)
-    ind_r = ind_r[1:contat_tot-1]
-    ind_c = ind_c[1:contat_tot-1]
+    vals = ones(Float64, contat_tot)
+    ind_r = ind_r[1:contat_tot]
+    ind_c = ind_c[1:contat_tot]
     sup_centers = sup_centers[1:nnz_surf,:]
     sup_type = sup_type[1:nnz_surf]
 
@@ -1200,10 +1200,9 @@ function generate_interconnection_matrices_and_centers(size_x,size_y,size_z,grid
 
     lumped_el_matrix.le_voxels, lumped_el_matrix.le_nodes = find_nodes_port(volume_centers,lumped_el_matrix.le_start,lumped_el_matrix.le_end, nodes, nodes_red)
 
-
     vals,ind_r,ind_c,sup_centers,sup_type=create_Gamma_and_center_sup(grid_matrix,num_cel_x,num_cel_y,num_cel_z,mapping_vols, minimum_vertex, size_x,size_y,size_z, nodes, nodes_red, externals_grids)
 
-    Gamma = sparse(ind_r .+ 1, ind_c .+ 1, vals)
+    Gamma = sparse(ind_r, ind_c, vals)
 
     println("Number of Surfaces (without air):", size(Gamma)[2])
 
@@ -1217,7 +1216,7 @@ function generate_interconnection_matrices_and_centers(size_x,size_y,size_z,grid
 
     
 
-    A = sparse(ind_row, ind_col .+ 1, vals_A)
+    A = sparse(ind_row, ind_col, vals_A)
 
     println("Edges without air:", n_for_Ax+n_for_Ay+n_for_Az)
     println("Nodes without air:", size(Gamma)[1])
