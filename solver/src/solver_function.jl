@@ -466,8 +466,8 @@ function precond_3_3_vector(lu,invZ,invP,A,Gamma,w,X1,X2,X3)
     n3=length(X3)
 
     i1=range(1, stop=n1)
-    i2=range(n1,stop=n1+n2)
-    i3=range(n1+n2,stop=n1+n2+n3)
+    i2=range(n1+1,stop=n1+n2)
+    i3=range(n1+n2+1,stop=n1+n2+n3)
 
     Y=zeros(Complex, n1+n2+n3, 1)
 
@@ -483,31 +483,34 @@ function precond_3_3_vector(lu,invZ,invP,A,Gamma,w,X1,X2,X3)
     #M4 = LU_S.solve(csc_matrix.*(Gamma,M3))
     M5 = lu\X3
 
-    for i in i1
-        Y[i] = Y[i]+M1-1.0*(*((invZ),*((A), M2)))
-        Y[i] = Y[i]+1im*w*(*((invZ),*((A), M4)))
-        Y[i] = Y[i]-1.0*(*((invZ),*((A), M5)))
-    end
+    # for i in i1
+    #     Y[i] = Y[i]+M1-1.0*(*((invZ),*((A), M2)))
+    #     Y[i] = Y[i]+1im*w*(*((invZ),*((A), M4)))
+    #     Y[i] = Y[i]-1.0*(*((invZ),*((A), M5)))
+    # end
+    Y[i1] .= Y[i1] .+ M1-1.0*(*((invZ),*((A), M2)))
+    Y[i1] .= Y[i1] .+ 1im*w*(*((invZ),*((A), M4)))
+    Y[i1] .= Y[i1] .- 1.0*(*((invZ),*((A), M5)))
 
     #Y[np.ix_(i1)] = Y[np.ix_(i1)]+M1-1.0*csc_matrix.*(invZ,csc_matrix.*(A,M2))
     #Y[np.ix_(i1)] = Y[np.ix_(i1)]+1im*w*csc_matrix.*(invZ, csc_matrix.*(A,M4))
     #Y[np.ix_(i1)] = Y[np.ix_(i1)]-1.0*csc_matrix.*(invZ, csc_matrix.*(A, M5))
 
-    for i in i2
-        Y[i] = Y[i]+(*(invP,*((transpose(Gamma)), M2)))
-        Y[i] = Y[i] + M3 -1im*w*(*(invP,*(transpose(Gamma), M4)))
-        Y[i] = Y[i]+(*(invP,*(transpose(Gamma), M5)))
-    end
+    
+    Y[i2] .= Y[i2] .+ (*(invP,*((transpose(Gamma)), M2)))
+    Y[i2] .= Y[i2] .+ M3 - 1im*w*(*(invP,*(transpose(Gamma), M4)))
+    Y[i2] .= Y[i2] .+ (*(invP,*(transpose(Gamma), M5)))
+    
 
     # Y[np.ix_(i2)] = Y[np.ix_(i2)]+csc_matrix.*(invP, csc_matrix.*(Gamma.transpose(), M2))
     # Y[np.ix_(i2)] = Y[np.ix_(i2)] + M3 -1im*w*csc_matrix.*(invP, csc_matrix.*(Gamma.transpose(), M4))
     # Y[np.ix_(i2)] = Y[np.ix_(i2)]+csc_matrix.*(invP, csc_matrix.*(Gamma.transpose(), M5))
 
-    for i in i3
-        Y[i] = Y[i]+M2
-        Y[i] = Y[i]-1im*w*M4
-        Y[i] = Y[i]+M5
-    end
+    
+    Y[i3] .= Y[i3] .+ M2
+    Y[i3] .= Y[i3] .- 1im*w*M4
+    Y[i3] .= Y[i3] .+ M5
+    
 
     # Y[np.ix_(i3)] = Y[np.ix_(i3)]+M2
     # Y[np.ix_(i3)] = Y[np.ix_(i3)]-1im*w*M4
@@ -587,7 +590,10 @@ function ComputeMatrixVector(w,escalings,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,Lp_z_ma
     Y1[ia2] = 1im * w * escalings.Lp * *(Lp_y_mat, I[ia2])
     Y1[ia3] = 1im * w * escalings.Lp * *(Lp_z_mat, I[ia3])
 
-    #println(A*Phi)
+    #println((A))
+    Phi = convert(Matrix{Complex{Float64}}, Phi)
+    Q = convert(Matrix{Complex{Float64}}, Q)
+    I = convert(Matrix{Complex{Float64}}, I)
 
     Y1=Y1+(Z_self .* I)+(*(A, Phi))
 
@@ -711,7 +717,7 @@ function Quasi_static_iterative_solver(freq_in,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,L
             #     end
             # end
 
-            for c2 in range(num_ports)
+            for c2 in range(1, stop=num_ports)
                 n3 = ports.port_nodes[c2, 1]
                 n4 = ports.port_nodes[c2, 2]
 

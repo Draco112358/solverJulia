@@ -421,7 +421,7 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams)
     # Lp_x_mat, Lp_y_mat, Lp_z_mat = compute_Lps(bars_Lp_x, bars_Lp_y, bars_Lp_z, sx, sy, sz) 
     # # print("Time for computing Lp with julia:", round(time.perf_counter_ns() / 1000 - cpu_time,2))
 
-    Z, Y, S = Quasi_static_iterative_solver(frequencies,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,Lp_z_mat,diag_R,diag_Cd,ports,lumped_elements,GMRES_settings)
+    Z, Y, S = @time Quasi_static_iterative_solver(frequencies,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,Lp_z_mat,diag_R,diag_Cd,ports,lumped_elements,GMRES_settings)
     
     # # Z, Y, S = solver_funcs.Quasi_static_direct_solver(freq,A,Gamma,P_mat,Lp_x_mat,\
     # #     Lp_y_mat,Lp_z_mat,diag_R,diag_Cd,ports,lumped_elements)
