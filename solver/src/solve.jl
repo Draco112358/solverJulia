@@ -290,8 +290,8 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams)
     inner_Iter = solverAlgoParams["innerIteration"]
     outer_Iter = solverAlgoParams["outerIteration"]
     tol = solverAlgoParams["convergenceThreshold"]*ones((n_freq))
-    #ind_low_freq= filter(i -> !iszero(frequencies[i]), findall(freq -> freq<1e5, frequencies))
-    #tol[ind_low_freq] = 1e-7
+    ind_low_freq= filter(i -> !iszero(frequencies[i]), findall(freq -> freq<1e5, frequencies))
+    tol[ind_low_freq] .= 1e-7
     
 
     GMRES_settings = GMRES_set(inner_Iter,outer_Iter,tol)
