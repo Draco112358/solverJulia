@@ -112,33 +112,11 @@ mutable struct le_def
     le_voxels
     le_nodes
 end
-
-# class LPWorker(Thread):
-#     def __init__(self, queue):
-#         Thread.__init__(self)
-#         self.queue = queue
-
-#     def run(self):
-#         while True:
-#             # Get the work from the queue and expand the tuple
-#             (bars, sizex, sizey, sizez, dc, Lps) = self.queue.get()
-#             try:
-#                 Lps.append(compute_Lp_matrix(bars=bars, sizex=sizex, sizey=sizey, sizez=sizez, dc=dc))
-#             finally:
-#                 self.queue.task_done()
                 
 
 function read_ports(inputData::Dict)
-    
     @assert inputData isa Dict
     ports = inputData["ports"]
-    # """
-    # A port is given by a couple of regions lying on the external surface of the compounded objects model. 
-    # In particular, a port is made by a starting region and an ending region. One of these regions can be:
-    # - a point
-    # - a surface (disk/rectangle - dimensions: user defined)
-    # - a collection of surfaces (è possibile posticipare questa versione)
-    # """
     port_objects = [el for el in ports]
     input_positions = []
     output_positions = []
@@ -266,9 +244,6 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams)
     mesherDict = Dict(mesherOutput)
     
     sx, sy, sz = mesherDict["cell_size"]["cell_size_x"],mesherDict["cell_size"]["cell_size_y"],mesherDict["cell_size"]["cell_size_z"]
-    # # sx = sx * 10
-    # # sy = sy * 10
-    # # sz = sz * 10
     num_input_files = mesherDict["n_materials"]
     
 
@@ -276,20 +251,14 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams)
     origin_y = mesherDict["origin"]["origin_y"]
     origin_z = mesherDict["origin"]["origin_z"]
 
-    # # origin_x = origin_x * 10
-    # # origin_y = origin_y * 10
-    # # origin_z = origin_z * 10
-
     origin = (origin_x,origin_y,origin_z)
     Nx = Int64(mesherDict["n_cells"]["n_cells_x"])
     Ny = Int64(mesherDict["n_cells"]["n_cells_y"])
     Nz = Int64(mesherDict["n_cells"]["n_cells_z"])
 
-    #print(mesherDict["mesher_matrices"])
 
     testarray = []
     for (index, value) in mesherDict["mesher_matrices"]
-        #print(copy(value))
         push!(testarray, copy(value))
     end
 
@@ -297,13 +266,8 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams)
 
     for i in testarray
         grids = unsqueeze([i], dims=2)
-        #print(grids[1][4][2][1])
     end
 
-
-
-
-    #grids = unsqueeze([mesherDict["mesher_matrices"][i] for i in mesherDict["mesher_matrices"]], dims=2)
 
     frequencies = inputDict["frequencies"]
     
@@ -322,14 +286,6 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams)
     
     
     # # START SETTINGS--------------------------------------------
-    # # n_freq=10
-    # print("numero frequenze ",n_freq)
-    # print("frequenze ",frequencies)
-    #print("frequenze trasformate ",freq)
-
-    
-    
-    # #TODO: hardcoded stuff
     
     inner_Iter = solverAlgoParams["innerIteration"]
     outer_Iter = solverAlgoParams["outerIteration"]
@@ -341,93 +297,22 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams)
     GMRES_settings = GMRES_set(inner_Iter,outer_Iter,tol)
     
     # # END SETTINGS----------------------------------------------
-    
-    # # cpu_time = time.perf_counter_ns() / 1000;
-
-
-    # # print(sx, sy, sz,Nx,Ny,Nz,origin)
 
     A, Gamma, ports, lumped_elements, sup_centers, sup_type, bars_Lp_x, bars_Lp_y, bars_Lp_z, diag_R, diag_Cd = generate_interconnection_matrices_and_centers(sx, sy, sz,
                                                                                                                                                             grids, Nx, Ny, Nz,                                                                                                                                                      MATERIALS, PORTS, L_ELEMENTS,
                                                                                                                                                             origin)  
-    
-                                                                                                                                                            # for k in range(1, stop=size(ports.voxels)[1])
-    #     ports.port_voxels[k,1] = ports.voxels[k,1]
-    #     ports.port_voxels[k,2] = ports.voxels[k, 2]
-    #     ports.port_nodes[k,1] = ports.nodes[k, 1]
-    #     ports.port_nodes[k,2] = ports.nodes[k, 2]
-    # end
 
-    # for k in range(1, stop=size(lumped_elements.voxels)[1])
-    #     lumped_elements.le_voxels[k,1]=lumped_elements.voxels[k,1]
-    #     lumped_elements.le_voxels[k, 2] = lumped_elements.voxels[k, 2]
-    #     lumped_elements.le_nodes[k, 1] = lumped_elements.nodes[k, 1]
-    #     lumped_elements.le_nodes[k, 2] = lumped_elements.nodes[k, 2]
-    # end
-    
-    # # print("Time for mesher manipulation and data formatting:", round(time.perf_counter_ns() / 1000 - cpu_time,2))
-    
-
-    # # cpu_time = time.perf_counter_ns() / 1000;
-    #P_mat = compute_P_matrix(sup_centers,sup_type,sx,sy,sz)
     println("Time for P")
     P_mat = @time compute_P_matrix(sup_centers,sup_type,sx,sy,sz)
     
-    # # print("Time for computing P parallel:", round(time.perf_counter_ns() / 1000 - cpu_time,2))
-    # # print(P_mat)
-
-    # # cpu_time = time.perf_counter_ns() / 1000;
-    # # P_mat = Main.compute_P_matrix(sup_centers,sup_type,sx,sy,sz)
-    # # print("Time for computing P with julia:", round(time.perf_counter_ns() / 1000 - cpu_time,2))
-    
-    # # cpu_time = time.perf_counter_ns() / 1000;
-    # # # note that this computation can be parallelized
     println("Time for Lp")
     Lp_x_mat = @time compute_Lp_matrix_1(bars_Lp_x,sy,sz)
     Lp_y_mat = @time compute_Lp_matrix_2(bars_Lp_y,sx,sz)
     Lp_z_mat = @time compute_Lp_matrix_3(bars_Lp_z,sx,sy)
-    # # print("Time for computing Lp:", round(time.perf_counter_ns() / 1000 - cpu_time,2))
-
-
-    # inputLP = [(bars_Lp_x, sx, sy, sz, 1), (bars_Lp_y, sx, sy, sz, 2), (bars_Lp_z, sx, sy, sz, 3)]
-    # Lps = []
-    # # cpu_time = time.perf_counter_ns() / 1000;
-    # with multiprocessing.Pool() as pool:
-    #     Lps = pool.starmap(compute_Lp_matrix, inputLP)
-    # print("Time for computing Lp:", round(time.perf_counter_ns() / 1000 - cpu_time,2))
-    # Lp_x_mat = Lps[0]
-    # Lp_y_mat = Lps[1]
-    # Lp_z_mat = Lps[2]
-    
-    # # cpu_time = time.perf_counter_ns() / 1000;
-    # # queue = Queue()
-    # # # Create 8 worker threads
-    # # for x in range(8):
-    # #     worker = LPWorker(queue)
-    # #     # Setting daemon to True will let the main thread exit even though the workers are blocking
-    # #     worker.daemon = True
-    # #     worker.start()
-    # # # Put the tasks into the queue as a tuple
-    # # queue.put((bars_Lp_x, sx, sy, sz, 1, Lps))
-    # # queue.put((bars_Lp_y, sx, sy, sz, 2, Lps))
-    # # queue.put((bars_Lp_z, sx, sy, sz, 3, Lps))
-    # # # Causes the main thread to wait for the queue to finish processing all the tasks
-    # # queue.join()
-    # # print("Time for computing Lp:", round(time.perf_counter_ns() / 1000 - cpu_time,2))
-    # # print(Lps[0])
-
-
-    # # cpu_time = time.perf_counter_ns() / 1000;
-    # Lp_x_mat, Lp_y_mat, Lp_z_mat = compute_Lps(bars_Lp_x, bars_Lp_y, bars_Lp_z, sx, sy, sz) 
-    # # print("Time for computing Lp with julia:", round(time.perf_counter_ns() / 1000 - cpu_time,2))
+   
 
     println("Time for solver algo")
     Z, Y, S = @time Quasi_static_iterative_solver(frequencies,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,Lp_z_mat,diag_R,diag_Cd,ports,lumped_elements,GMRES_settings)
-    
-    # # Z, Y, S = solver_funcs.Quasi_static_direct_solver(freq,A,Gamma,P_mat,Lp_x_mat,\
-    # #     Lp_y_mat,Lp_z_mat,diag_R,diag_Cd,ports,lumped_elements)
-    
-    # # print("Time for Solver:", round(time.perf_counter_ns() / 1000 - cpu_time,2))
 
     return dump_json_data(Z,S,Y)
 end
