@@ -695,7 +695,7 @@ function Quasi_static_iterative_solver(freq_in,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,L
 
             prodts = LinearMap(products_law, n + m + ns, n + m + ns)
 
-            V_o, info = gmres!(X_prec[:, c1], prodts, tn, reltol=GMRES_settings.tol[k], restart=10000, maxiter=Inner_Iter, log=true)
+            V_o, info = gmres!(X_prec[:, c1], prodts, tn, reltol=GMRES_settings.tol[k], restart=10000, maxiter=Inner_Iter, log=true, verbose=true)
 
             # V_o, info = linalg.gmres(prodts, tn, x0=X_prec[:, c1], tol=GMRES_settings.tol[k], \
             #                               restart=None, maxiter=Inner_Iter, M=None, \

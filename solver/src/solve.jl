@@ -19,8 +19,6 @@ function dump_json_data(matrix_Z,matrix_S,matrix_Y)
         "matrix_S" => JSON.json(matrix_S),
         "matrix_Y" => JSON.json(matrix_Y)
     )
-
-    print(solver_matrices_dict)
     
     return solver_matrices_dict
 end
@@ -372,6 +370,7 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams)
 
     # # cpu_time = time.perf_counter_ns() / 1000;
     #P_mat = compute_P_matrix(sup_centers,sup_type,sx,sy,sz)
+    println("Time for P")
     P_mat = @time compute_P_matrix(sup_centers,sup_type,sx,sy,sz)
     
     # # print("Time for computing P parallel:", round(time.perf_counter_ns() / 1000 - cpu_time,2))
@@ -383,6 +382,7 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams)
     
     # # cpu_time = time.perf_counter_ns() / 1000;
     # # # note that this computation can be parallelized
+    println("Time for Lp")
     Lp_x_mat = @time compute_Lp_matrix_1(bars_Lp_x,sy,sz)
     Lp_y_mat = @time compute_Lp_matrix_2(bars_Lp_y,sx,sz)
     Lp_z_mat = @time compute_Lp_matrix_3(bars_Lp_z,sx,sy)
@@ -421,6 +421,7 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams)
     # Lp_x_mat, Lp_y_mat, Lp_z_mat = compute_Lps(bars_Lp_x, bars_Lp_y, bars_Lp_z, sx, sy, sz) 
     # # print("Time for computing Lp with julia:", round(time.perf_counter_ns() / 1000 - cpu_time,2))
 
+    println("Time for solver algo")
     Z, Y, S = @time Quasi_static_iterative_solver(frequencies,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,Lp_z_mat,diag_R,diag_Cd,ports,lumped_elements,GMRES_settings)
     
     # # Z, Y, S = solver_funcs.Quasi_static_direct_solver(freq,A,Gamma,P_mat,Lp_x_mat,\
@@ -428,5 +429,5 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams)
     
     # # print("Time for Solver:", round(time.perf_counter_ns() / 1000 - cpu_time,2))
 
-    return diag_R 
+    return dump_json_data(Z,S,Y)
 end
