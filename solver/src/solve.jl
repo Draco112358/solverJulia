@@ -12,12 +12,46 @@ function encode_complex(z)
     end
 end
        
-function dump_json_data(matrix_Z,matrix_S,matrix_Y)
+function dump_json_data(matrix_Z,matrix_S,matrix_Y, num_ports)
+
+    z = [[[0.1, 0.0]]]
+    pop!(z)
+
+    matrix_Z = convert(Array{ComplexF64, 3}, matrix_Z)
+    matrix_S = convert(Array{ComplexF64, 3}, matrix_S)
+    matrix_Y = convert(Array{ComplexF64, 3}, matrix_Y)
+    
+    for i in range(1,num_ports)
+        e = [[0.1, 0.0]]
+        pop!(e)
+        elements = map(v -> reinterpret(Float64, [v]), matrix_Z[1,i,:])
+        push!(z, elements)
+    end
+
+    s = [[[0.1, 0.0]]]
+    pop!(s)
+    
+    for i in range(1,num_ports)
+        e = [[0.1, 0.0]]
+        pop!(e)
+        elements = map(v -> reinterpret(Float64, [v]), matrix_S[1,i,:])
+        push!(s, elements)
+    end
+
+    y = [[[0.1, 0.0]]]
+    pop!(y)
+    
+    for i in range(1,num_ports)
+        e = [[0.1, 0.0]]
+        pop!(e)
+        elements = map(v -> reinterpret(Float64, [v]), matrix_Y[1,i,:])
+        push!(y, elements)
+    end
 
     solver_matrices_dict = Dict(
-        "matrix_Z" => JSON.json(matrix_Z),
-        "matrix_S" => JSON.json(matrix_S),
-        "matrix_Y" => JSON.json(matrix_Y)
+        "matrix_Z" => JSON.json([z]),
+        "matrix_S" => JSON.json([s]),
+        "matrix_Y" => JSON.json([y])
     )
     
     return solver_matrices_dict
@@ -275,6 +309,8 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams)
     
     PORTS = read_ports(inputDict)
     
+    println(length(inputDict["ports"]))
+
     L_ELEMENTS = read_lumped_elements(inputDict)
 
 
@@ -314,5 +350,5 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams)
     println("Time for solver algo")
     Z, Y, S = @time Quasi_static_iterative_solver(frequencies,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,Lp_z_mat,diag_R,diag_Cd,ports,lumped_elements,GMRES_settings)
 
-    return dump_json_data(Z,S,Y)
+    return dump_json_data(Z,S,Y, length(inputDict["ports"]))
 end

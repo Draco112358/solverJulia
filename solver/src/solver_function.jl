@@ -3,6 +3,7 @@ using LinearAlgebra
 using IterativeSolvers
 using LinearMaps
 
+
 struct escals
     Lp
     P
@@ -472,7 +473,6 @@ function precond_3_3_vector(lu,invZ,invP,A,Gamma,w,X1,X2,X3)
     Y=zeros(Complex, n1+n2+n3, 1)
 
 
-    #da rivedere
     M1 = *(invZ, X1)
     #M1 = csc_matrix.*(invZ, X1)
     M2 = lu\(*(transpose(A), M1))
@@ -676,7 +676,7 @@ function Quasi_static_iterative_solver(freq_in,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,L
         SS = Yle+(*(transpose(A),*(invZ,A))+1im*w[k]*(*(Gamma,*(invP,transpose(Gamma)))))
         #SS=Yle+(*(transpose(A),*(invZ,A))+1im*w[k]*(*(Gamma,*(invP,transpose(Gamma)))))
 
-        F=splu(SS)
+        F = splu(SS)
         #println(F.Pr * SS * F.Pc == F.L * F.U)
 
         #LU_S = linalg.spilu(SS, drop_tol=1e-6, options=dict(SymmetricMode=True))
@@ -695,8 +695,12 @@ function Quasi_static_iterative_solver(freq_in,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,L
 
             prodts = LinearMap(products_law, n + m + ns, n + m + ns)
 
-            V_o, info = gmres!(X_prec[:, c1], prodts, tn, reltol=GMRES_settings.tol[k], restart=10000, maxiter=Inner_Iter, log=true, verbose=true)
+            #V_o, info = dqgmres(A, tn[:,1], memory=n + m + ns, history=true)
 
+            #V_o, info = gmres(prodts, tn[:,1], reltol=GMRES_settings.tol[k], restart=10000, maxiter=GMRES_settings.Inner_Iter, log=true)
+            V_o, info = gmres!(X_prec[:,c1], prodts, tn[:,1], reltol=GMRES_settings.tol[k], restart=10000, maxiter=GMRES_settings.Inner_Iter, log=true)
+            println(info)
+            
             # V_o, info = linalg.gmres(prodts, tn, x0=X_prec[:, c1], tol=GMRES_settings.tol[k], \
             #                               restart=None, maxiter=Inner_Iter, M=None, \
             #                               callback=counter, restrt=None, atol=None, callback_type=None)
