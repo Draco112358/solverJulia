@@ -14,7 +14,7 @@ end
        
 function dump_json_data(matrix_Z,matrix_S,matrix_Y, num_ports)
 
-    z = [[[0.1, 0.0]]]
+    z = [[[[0.1, 0.0]]]]
     pop!(z)
 
     matrix_Z = convert(Array{ComplexF64, 3}, matrix_Z)
@@ -22,36 +22,30 @@ function dump_json_data(matrix_Z,matrix_S,matrix_Y, num_ports)
     matrix_Y = convert(Array{ComplexF64, 3}, matrix_Y)
     
     for i in range(1,num_ports)
-        e = [[0.1, 0.0]]
-        pop!(e)
         elements = map(v -> reinterpret(Float64, [v]), matrix_Z[1,i,:])
-        push!(z, elements)
+        push!(z, [elements])
     end
 
-    s = [[[0.1, 0.0]]]
+    s = [[[[0.1, 0.0]]]]
     pop!(s)
     
     for i in range(1,num_ports)
-        e = [[0.1, 0.0]]
-        pop!(e)
         elements = map(v -> reinterpret(Float64, [v]), matrix_S[1,i,:])
-        push!(s, elements)
+        push!(s, [elements])
     end
 
-    y = [[[0.1, 0.0]]]
+    y = [[[[0.1, 0.0]]]]
     pop!(y)
     
     for i in range(1,num_ports)
-        e = [[0.1, 0.0]]
-        pop!(e)
         elements = map(v -> reinterpret(Float64, [v]), matrix_Y[1,i,:])
-        push!(y, elements)
+        push!(y, [elements])
     end
 
     solver_matrices_dict = Dict(
-        "matrix_Z" => JSON.json([z]),
-        "matrix_S" => JSON.json([s]),
-        "matrix_Y" => JSON.json([y])
+        "matrix_Z" => JSON.json(z),
+        "matrix_S" => JSON.json(s),
+        "matrix_Y" => JSON.json(y)
     )
     
     return solver_matrices_dict
