@@ -2,7 +2,8 @@ using SuperLU, SparseArrays
 using LinearAlgebra
 using IterativeSolvers
 using LinearMaps
-
+#using Krylov
+#using KrylovMethods
 
 struct escals
     Lp
@@ -30,7 +31,7 @@ end
 
 function compute_Z_self(R,Cd,w)
     len_R=size(R)[1]
-    Z_self=zeros(Complex,len_R,1)
+    Z_self=zeros(ComplexF64 ,len_R,1)
     for cont in range(1,stop=len_R)
         for aux in range(1, stop=4)
             if R[cont,aux]!=0 && Cd[cont,aux]!=0
@@ -71,7 +72,7 @@ function build_Yle_S(lumped_elements, ports, escalings, n, w, val_chiusura)
 
     ind_r = zeros(Int64, NNz_max)
     ind_c = zeros(Int64, NNz_max)
-    vals = zeros(Complex, NNz_max)
+    vals = zeros(ComplexF64 , NNz_max)
 
     nlum = size(lumped_elements.le_nodes)[1]
 
@@ -281,7 +282,7 @@ function build_Yle_S_no_scal(lumped_elements, ports, n, w, val_chiusura)
 
     ind_r = zeros(Int64, NNz_max)
     ind_c = zeros(Int64, NNz_max)
-    vals = zeros(Complex, NNz_max)
+    vals = zeros(ComplexF64 , NNz_max)
 
     nlum = size(lumped_elements.le_nodes)[1]
 
@@ -470,16 +471,17 @@ function precond_3_3_vector(lu,invZ,invP,A,Gamma,w,X1,X2,X3)
     i2=range(n1+1,stop=n1+n2)
     i3=range(n1+n2+1,stop=n1+n2+n3)
 
-    Y=zeros(Complex, n1+n2+n3, 1)
+    Y=zeros(ComplexF64 , n1+n2+n3)
 
 
-    M1 = *(invZ, X1)
+    #da rivedere
+    M1 = prod_real_complex(invZ, X1)
     #M1 = csc_matrix.*(invZ, X1)
-    M2 = lu\(*(transpose(A), M1))
+    M2 = lu\(prod_real_complex(transpose(A), M1))
     #M2 = LU_S.solve(csc_matrix.dot(A.transpose(),M1))
-    M3 = *(invP, X2)
+    M3 = prod_real_complex(invP, X2)
     #M3 = csc_matrix.*(invP,X2)
-    M4 = lu\*(Gamma, M3)
+    M4 = lu\prod_real_complex(Gamma, M3)
     #M4 = LU_S.solve(csc_matrix.*(Gamma,M3))
     M5 = lu\X3
 
@@ -488,18 +490,18 @@ function precond_3_3_vector(lu,invZ,invP,A,Gamma,w,X1,X2,X3)
     #     Y[i] = Y[i]+1im*w*(*((invZ),*((A), M4)))
     #     Y[i] = Y[i]-1.0*(*((invZ),*((A), M5)))
     # end
-    Y[i1] .= Y[i1] .+ M1-1.0*(*((invZ),*((A), M2)))
-    Y[i1] .= Y[i1] .+ 1im*w*(*((invZ),*((A), M4)))
-    Y[i1] .= Y[i1] .- 1.0*(*((invZ),*((A), M5)))
+    Y[i1] .= Y[i1] .+ M1-1.0*(prod_real_complex((invZ),prod_real_complex((A), M2)))
+    Y[i1] .= Y[i1] .+ 1im*w*(prod_real_complex((invZ),prod_real_complex((A), M4)))
+    Y[i1] .= Y[i1] .- 1.0*(prod_real_complex((invZ),prod_real_complex((A), M5)))
 
     #Y[np.ix_(i1)] = Y[np.ix_(i1)]+M1-1.0*csc_matrix.*(invZ,csc_matrix.*(A,M2))
     #Y[np.ix_(i1)] = Y[np.ix_(i1)]+1im*w*csc_matrix.*(invZ, csc_matrix.*(A,M4))
     #Y[np.ix_(i1)] = Y[np.ix_(i1)]-1.0*csc_matrix.*(invZ, csc_matrix.*(A, M5))
 
     
-    Y[i2] .= Y[i2] .+ (*(invP,*((transpose(Gamma)), M2)))
-    Y[i2] .= Y[i2] .+ M3 - 1im*w*(*(invP,*(transpose(Gamma), M4)))
-    Y[i2] .= Y[i2] .+ (*(invP,*(transpose(Gamma), M5)))
+    Y[i2] .= Y[i2] .+ (prod_real_complex(invP,prod_real_complex((transpose(Gamma)), M2)))
+    Y[i2] .= Y[i2] .+ M3 - 1im*w*(prod_real_complex(invP,prod_real_complex(transpose(Gamma), M4)))
+    Y[i2] .= Y[i2] .+ (prod_real_complex(invP,prod_real_complex(transpose(Gamma), M5)))
     
 
     # Y[np.ix_(i2)] = Y[np.ix_(i2)]+csc_matrix.*(invP, csc_matrix.*(Gamma.transpose(), M2))
@@ -516,6 +518,7 @@ function precond_3_3_vector(lu,invZ,invP,A,Gamma,w,X1,X2,X3)
     # Y[np.ix_(i3)] = Y[np.ix_(i3)]-1im*w*M4
     # Y[np.ix_(i3)] = Y[np.ix_(i3)]+M5
 
+    Y=convert(Array{Complex{Float64}}, Y)
     return Y
 end
 
@@ -527,15 +530,15 @@ function precond_3_3_Kt(lu, invZ, invP, A,Gamma, n1,n2, X3)
     i2 = range(n1+1, stop=n1 + n2)
     i3 = range(n1 + n2 + 1, stop=n1 + n2 + n3)
 
-    Y = zeros(ComplexF64, n1 + n2 + n3,1)
+    Y = zeros(ComplexF64, n1 + n2 + n3)
 
     #println(X3)
 
     M5 = lu\X3
     #display(M5)
 
-    Y[i1] .= Y[i1] .- 1.0*(*(invZ, *(A, M5)))
-    Y[i2] .= Y[i2] .+ (*(invP, *(transpose(Gamma), M5)))
+    Y[i1] .= Y[i1] .- 1.0*(prod_real_complex(invZ, prod_real_complex(A, M5)))
+    Y[i2] .= Y[i2] .+ (prod_real_complex(invP, prod_real_complex(transpose(Gamma), M5)))
     Y[i3] .= Y[i3] .+ M5
 
     return Y
@@ -544,7 +547,7 @@ end
 function s2z(S,Zo)
     num_ports=size(S)[1]
     nfreq=size(S)[3]
-    Z = zeros(Complex, num_ports, num_ports, nfreq)
+    Z = zeros(ComplexF64 , num_ports, num_ports, nfreq)
     Id = Matrix{Int64}(I, num_ports, num_ports)
     for cont in range(1, stop=nfreq)
         Z[:,:,cont]=Zo*((Id-1.0*S[:,:,cont])\(Id+S[:,:,cont]))
@@ -556,7 +559,7 @@ end
 function s2y(S,Zo)
     num_ports=size(S)[1]
     nfreq=size(S)[3]
-    Y = zeros(Complex, num_ports, num_ports, nfreq)
+    Y = zeros(ComplexF64 , num_ports, num_ports, nfreq)
     Id = Matrix{Int64}(I, num_ports, num_ports)
     for cont in range(1, stop=nfreq)
         Y[:,:,cont]=Zo*((Id+S[:,:,cont])\(Id-1.0*S[:,:,cont]))
@@ -564,8 +567,28 @@ function s2y(S,Zo)
     return Y
 end
 
+function prod_real_complex(A,x)
+    # A is a N x N real matrix and x is a complex matrix
+
+    N=size(A,1);
+    y=zeros(ComplexF64 , N, 1)
+    y=*(A,real.(x))+1im * *(A,imag.(x))
+    return y
+end
+
+function prod_complex_real(A,x)
+    # A is a N x N complex matrix and x is a real matrix
+
+    N=size(A,1);
+    y=zeros(ComplexF64 , N, 1)
+    y=*(real.(A),x)+1im * *(imag.(A),x)
+    return y
+end
+
 function ComputeMatrixVector(w,escalings,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,Lp_z_mat,
-                        Z_self,Yle,invZ,invP,lu, x)
+                        Z_self,Yle,invZ,invP,lu, x_in)
+
+    x::Vector{ComplexF64}=x_in[:,1];
 
     mx = size(Lp_x_mat)[1]
     my = size(Lp_y_mat)[1]
@@ -574,21 +597,21 @@ function ComputeMatrixVector(w,escalings,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,Lp_z_ma
     m = mx + my + mz
     ns = size(Gamma)[2]
     n = size(Gamma)[1]
-    I = zeros(Complex, m, 1)
-    Q = zeros(Complex, ns, 1)
-    Phi = zeros(Complex, n, 1)
+    I = zeros(ComplexF64 , m, 1)
+    Q = zeros(ComplexF64 , ns, 1)
+    Phi = zeros(ComplexF64 , n, 1)
     I[1:m, 1] = x[1:m]
     Q[1:ns, 1] = x[m + 1:m + ns]
     Phi[1:n, 1] = x[m + ns + 1:m + ns + n]
-    Y1 = zeros(Complex, m, 1)
+    Y1 = zeros(ComplexF64 , m, 1)
 
     ia1 = range(1, stop=mx)
     ia2 = range(mx+1, stop=mx + my)
     ia3 = range(mx + my + 1, stop=mx + my + mz)
 
-    Y1[ia1] = 1im * w * escalings.Lp * *(Lp_x_mat, I[ia1])
-    Y1[ia2] = 1im * w * escalings.Lp * *(Lp_y_mat, I[ia2])
-    Y1[ia3] = 1im * w * escalings.Lp * *(Lp_z_mat, I[ia3])
+    Y1[ia1] = 1im * w * escalings.Lp * prod_real_complex(Lp_x_mat, I[ia1]);
+    Y1[ia2] = 1im * w * escalings.Lp * prod_real_complex(Lp_y_mat, I[ia2])
+    Y1[ia3] = 1im * w * escalings.Lp * prod_real_complex(Lp_z_mat, I[ia3])
 
     #println((A))
     Phi = convert(Matrix{Complex{Float64}}, Phi)
@@ -597,8 +620,9 @@ function ComputeMatrixVector(w,escalings,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,Lp_z_ma
 
     Y1=Y1+(Z_self .* I)+(*(A, Phi))
 
-    Y2 = escalings.P *(*(P_mat,Q) -1.0*(*(transpose(Gamma), Phi)))
-    Y3 = -1.0*(*(transpose(A), I)) + *((Yle), Phi) +1im*w*(*(Gamma, Q))
+    Y2 = escalings.P *(prod_real_complex(P_mat,Q) -1.0*(prod_real_complex(transpose(Gamma), Phi)))
+    
+    Y3 = -1.0*(prod_real_complex(transpose(A), I)) + prod_real_complex(Yle, Phi) +1im*w*(prod_real_complex(Gamma, Q))
 
     MatrixVector = precond_3_3_vector(lu, invZ, invP, A,Gamma, w, Y1, Y2, Y3)
 
@@ -632,10 +656,11 @@ function Quasi_static_iterative_solver(freq_in,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,L
 
     num_ports=size(ports.port_start)[1]
 
-    S = zeros(Complex, num_ports, num_ports, nfreq)
+    S = zeros(ComplexF64 , num_ports, num_ports, nfreq)
 
-    X_prec=zeros(Complex, m+n+ns, num_ports)
+    X_prec=zeros(ComplexF64 , m+n+ns, num_ports)
 
+    #=
     diag_P = zeros(Float64, ns)
     for c in range(1, stop=ns)
         diag_P[c]=escalings.P*P_mat[c,c]
@@ -651,6 +676,14 @@ function Quasi_static_iterative_solver(freq_in,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,L
     for c in range(1, stop=mz)
         diag_Lp[c+mx+my] = escalings.Lp*Lp_z_mat[c, c]
     end
+    =#
+
+    diag_P=escalings.P*diag(P_mat)
+    diag_Lp = zeros(Float64, m)
+
+    diag_Lp[range(1, stop=mx)] = escalings.Lp*diag(Lp_x_mat)
+    diag_Lp[range(mx+1, stop=mx+my)] = escalings.Lp*diag(Lp_y_mat)
+    diag_Lp[range(mx+my+1, stop=m)] = escalings.Lp*diag(Lp_z_mat)
 
     invP = sparse(range(1, stop=ns), range(1, stop=ns), 1. ./ diag_P,ns,ns)
 
@@ -673,10 +706,12 @@ function Quasi_static_iterative_solver(freq_in,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,L
         invZ = sparse(range(1, stop=m), range(1, stop=m), (1. ./ (Z_self[:,1] .+ (1im * w[k] * diag_Lp))),m,m)
         #println(Yle) yle non coincide
         #println(size((*(transpose(A),*(invZ,A))+1im*w[k]*(*(Gamma,*(invP,transpose(Gamma)))))))
-        SS = Yle+(*(transpose(A),*(invZ,A))+1im*w[k]*(*(Gamma,*(invP,transpose(Gamma)))))
+        SS = Yle+(prod_real_complex(transpose(A),prod_complex_real(invZ,A))+1im*w[k]*(*(Gamma,*(invP,transpose(Gamma)))))
         #SS=Yle+(*(transpose(A),*(invZ,A))+1im*w[k]*(*(Gamma,*(invP,transpose(Gamma)))))
 
-        F = splu(SS)
+        # println("tempo lu")
+        F=splu(SS)
+        
         #println(F.Pr * SS * F.Pc == F.L * F.U)
 
         #LU_S = linalg.spilu(SS, drop_tol=1e-6, options=dict(SymmetricMode=True))
@@ -693,19 +728,43 @@ function Quasi_static_iterative_solver(freq_in,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,L
 
             products_law = x -> ComputeMatrixVector( w[k], escalings, A,Gamma, P_mat,Lp_x_mat,Lp_y_mat,Lp_z_mat,Z_self, Yle, invZ,invP, F, x)
 
-            prodts = LinearMap(products_law, n + m + ns, n + m + ns)
+            prodts = LinearMap{ComplexF64}(products_law, n + m + ns, n + m + ns)
 
-            #V_o, info = dqgmres(A, tn[:,1], memory=n + m + ns, history=true)
-
-            #V_o, info = gmres(prodts, tn[:,1], reltol=GMRES_settings.tol[k], restart=10000, maxiter=GMRES_settings.Inner_Iter, log=true)
-            V_o, info = gmres!(X_prec[:,c1], prodts, tn[:,1], reltol=GMRES_settings.tol[k], restart=10000, maxiter=GMRES_settings.Inner_Iter, log=true)
-            println(info)
+            x0::Vector{ComplexF64}=X_prec[:, c1];
             
-            # V_o, info = linalg.gmres(prodts, tn, x0=X_prec[:, c1], tol=GMRES_settings.tol[k], \
-            #                               restart=None, maxiter=Inner_Iter, M=None, \
-            #                               callback=counter, restrt=None, atol=None, callback_type=None)
 
-            V = V_o
+            # gmres della libreria IterativeSolvers
+            V, info = gmres!(x0, prodts, tn , initially_zero=false,  reltol=GMRES_settings.tol[k], restart=Inner_Iter, maxiter=Inner_Iter, log=true, verbose=false)
+            println(info)
+
+
+            # gmres della libreria Krylov
+            #=
+            (V, stats) = gmres(prodts,tn,x0;
+                   restart=false, memory=Outer_Iter, reorthogonalization=false,
+                   rtol=GMRES_settings.tol[k], itmax=Inner_Iter,
+                   verbose=0, history=false)
+            
+            if(stats.solved==true)        
+                println("convergence reached, number of iterations: "*string(stats.niter))
+            else
+                println("convergence not reached, number of iterations: "*string(stats.niter))
+            end
+            =#
+
+            # gmres della libreria KrylovMethods
+            #=
+            V,flag,err,iter,resvec = gmres(prodts,tn,Inner_Iter,tol=GMRES_settings.tol[k],maxIter=1,x=x0,out=0)
+
+            if(flag==0)        
+                println("convergence reached, number of iterations: "*string(length(resvec)))
+            elseif(flag==-1)
+                println("convergence not reached, number of iterations: "*string(length(resvec)))
+            else
+                println("RHS all zeros, number of iterations: "*string(length(resvec)))
+            end
+            =#
+
             X_prec[:, c1]=V
 
             Is[n1] = 0.0

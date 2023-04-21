@@ -1,7 +1,7 @@
 using SparseArrays
 
 function From_3D_to_1D(i, j, k, M, N)
-    pos = ((k-1) * M * N) + ((j-1) * M) + i-1
+    pos = ((k-1) * M * N) + ((j-1) * M) + i;
     return pos
 end
 
@@ -39,8 +39,6 @@ function create_volumes_mapping_and_centers(matrice,Nx,Ny,Nz,num_centri,sx,sy,sz
     centri_vox = zeros(Float64, num_centri, 3)
     id_mat = zeros(Int64, num_centri)
 
- 
-
     num_grids = size(matrice)[1]
     num_ele=1
     for cont in range(1, stop=Nx)
@@ -48,7 +46,7 @@ function create_volumes_mapping_and_centers(matrice,Nx,Ny,Nz,num_centri,sx,sy,sz
             for cont3 in range(1, stop=Nz)
                 for k in range(1, stop=num_grids)
                     if (matrice[k][cont][cont2][cont3]==true)
-                        mapping[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)+1]=num_ele
+                        mapping[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]=num_ele
                         centri_vox[num_ele, 1] = min_v[1] + (sx * (cont - 1))  + (sx / 2.0)
                         centri_vox[num_ele, 2] = min_v[2] + (sy * (cont2 - 1)) + (sy / 2.0)
                         centri_vox[num_ele, 3] = min_v[3] + (sz * (cont3 - 1)) + (sz / 2.0)
@@ -75,9 +73,9 @@ function create_nodes_ref(matrice, Nx,Ny,Nz, num_centri, external_g, m_volumes)
             for cont3 in range(1, stop=Nz)
                 for k in range(1, stop=num_grids)
                     if (matrice[k][cont][cont2][cont3] == 1)
-                        c1 = 2 * (cont - 1) + 1
-                        c2 = 2 * (cont2 - 1) + 1
-                        c3 = 2 * (cont3 - 1) + 1
+                        c1 = 1 + 2 * (cont - 1) + 1
+                        c2 = 1 + 2 * (cont2 - 1) + 1
+                        c3 = 1 + 2 * (cont3 - 1) + 1
                         f1 = external_g[k, 1, cont, cont2, cont3]
                         f2 = external_g[k, 2, cont, cont2, cont3]
                         f3 = external_g[k, 3, cont, cont2, cont3]
@@ -105,84 +103,113 @@ function create_nodes_ref(matrice, Nx,Ny,Nz, num_centri, external_g, m_volumes)
                             is_f6 = 0
                         end
 
-                        if (is_f1==1 || is_f2==1 || is_f3==1 || is_f4==1 || is_f5==1 || is_f6==1)
-                            if (is_f1==1 && is_f2==0 && is_f3==0 && is_f4==0 && is_f5==0 && is_f6==0)
-                                nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)+1]] = From_3D_to_1D((c1 + 1), (c2 + 1) - 1, (c3 + 1), 3 * Nx, 3 * Ny)
+                        if (is_f1==1 || is_f2==1 || is_f3==1 || is_f4==1 || is_f5==1 || is_f6==1) 
+                            if (is_f1==1 && is_f2==0 && is_f3==0 && is_f4==0 && is_f5==0 && is_f6==0) 
+                                nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]] = 
+                                    From_3D_to_1D(c1, c2 - 1, c3, 3 * Nx, 3 * Ny)
                             else
                                 if (is_f2 == 1 && is_f1 == 0 && is_f3 == 0 && is_f4 == 0 && is_f5 == 0 && is_f6 == 0)
-                                    nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)+1]] = From_3D_to_1D((c1 + 1), (c2 + 1) + 1, (c3 + 1), 3 * Nx, 3 * Ny)
+                                    nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]] = 
+                                        From_3D_to_1D(c1, c2 + 1, c3, 3 * Nx, 3 * Ny)
                                 else
                                     if (is_f3 == 1 && is_f1 == 0 && is_f2 == 0 && is_f4 == 0 && is_f5 == 0 && is_f6 == 0)
-                                        nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)+1]] = From_3D_to_1D((c1 + 1)-1, (c2 + 1) , (c3 + 1), 3 * Nx, 3 * Ny)
+                                        nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]] = 
+                                            From_3D_to_1D(c1-1, c2 , c3, 3 * Nx, 3 * Ny)
                                     else
                                         if (is_f4 == 1 && is_f1 == 0 && is_f2 == 0 && is_f3 == 0 && is_f5 == 0 && is_f6 == 0)
-                                            nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)+1]] = From_3D_to_1D((c1 + 1) + 1, (c2 + 1), (c3 + 1), 3 * Nx, 3 * Ny)
+                                            nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]] = 
+                                                From_3D_to_1D(c1 + 1, c2, c3, 3 * Nx, 3 * Ny)
                                         else
                                             if (is_f5 == 1 && is_f1 == 0 && is_f2 == 0 && is_f3 == 0 && is_f4 == 0 && is_f6 == 0)
-                                                nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)+1]] = From_3D_to_1D((c1 + 1), (c2 + 1), (c3 + 1)-1, 3 * Nx, 3 * Ny)
+                                                nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]] = 
+                                                    From_3D_to_1D(c1, c2, c3-1, 3 * Nx, 3 * Ny)
                                             else
                                                 if (is_f6 == 1 && is_f1 == 0 && is_f2 == 0 && is_f3 == 0 && is_f4 == 0 && is_f5 == 0)
-                                                    nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)+1]] = From_3D_to_1D((c1 + 1), (c2 + 1), (c3 + 1) + 1, 3 * Nx, 3 * Ny)
+                                                    nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]] = 
+                                                        From_3D_to_1D(c1, c2, c3 + 1, 3 * Nx, 3 * Ny)
                                                 else
                                                     if (is_f1 == 1 && is_f3 == 1 && is_f2 == 0 && is_f4 == 0 && is_f5 == 0 && is_f6 == 0)
-                                                        nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)+1]] = From_3D_to_1D((c1 + 1)-1, (c2 + 1)-1, (c3 + 1), 3 * Nx, 3 * Ny)
+                                                        nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]] = 
+                                                            From_3D_to_1D(c1-1, c2-1, c3, 3 * Nx, 3 * Ny)
                                                     else
                                                         if (is_f1 == 1 && is_f4 == 1 && is_f2 == 0 && is_f3 == 0 && is_f5 == 0 && is_f6 == 0)
-                                                            nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)+1]] = From_3D_to_1D((c1 + 1) + 1, (c2 + 1) - 1, (c3 + 1), 3 * Nx, 3 * Ny)
+                                                            nodes[m_volumes[
+                                                                From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]] = 
+                                                                From_3D_to_1D(c1 + 1, c2 - 1, c3, 3 * Nx, 3 * Ny)
                                                         else
                                                             if (is_f1 == 1 && is_f5 == 1 && is_f2 == 0 && is_f3 == 0 && is_f4 == 0 && is_f6 == 0)
-                                                                nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)+1]] = From_3D_to_1D((c1 + 1), (c2 + 1) - 1, (c3 + 1) - 1, 3 * Nx, 3 * Ny)
+                                                                nodes[m_volumes[
+                                                                    From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]] = 
+                                                                    From_3D_to_1D(c1, c2 - 1, c3 - 1, 3 * Nx, 3 * Ny)
                                                             else
                                                                 if (is_f1 == 1 && is_f6 == 1 && is_f2 == 0 && is_f3 == 0 && is_f4 == 0 && is_f5 == 0)
-                                                                    nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)+1]] = From_3D_to_1D((c1 + 1), (c2 + 1) - 1, (c3 + 1) + 1, 3 * Nx,3 * Ny)
+                                                                    nodes[m_volumes[
+                                                                        From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]] = 
+                                                                        From_3D_to_1D(c1, c2 - 1, c3 + 1, 3 * Nx,3 * Ny)
                                                                 else
                                                                     if (is_f1 == 1 && is_f3 == 1 && is_f5 == 1 && is_f2 == 0 && is_f4 == 0 && is_f6 == 0)
-                                                                        nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx,Ny)+1]] = From_3D_to_1D((c1 + 1)-1, (c2 + 1) - 1, (c3 + 1) - 1, 3 * Nx, 3 * Ny)
+                                                                        nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx,Ny)]] = 
+                                                                            From_3D_to_1D(c1-1, c2 - 1, c3 - 1, 3 * Nx, 3 * Ny)
                                                                     else
                                                                         if (is_f1 == 1 && is_f3 == 1 && is_f6 == 1 && is_f2 == 0 && is_f4 == 0 && is_f5 == 0)
-                                                                            nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx,Ny)+1]] = From_3D_to_1D((c1 + 1) - 1, (c2 + 1) - 1, (c3 + 1) + 1,3 * Nx, 3 * Ny)
+                                                                            nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3, Nx,Ny)]] = 
+                                                                                From_3D_to_1D(c1 - 1, c2 - 1, c3 + 1,3 * Nx, 3 * Ny)
                                                                         else
                                                                             if (is_f1 == 1 && is_f4 == 1 && is_f5 == 1 && is_f2 == 0 && is_f3 == 0 && is_f6 == 0)
-                                                                                nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3,Nx, Ny)+1]] = From_3D_to_1D((c1 + 1) + 1, (c2 + 1) - 1,(c3 + 1) - 1, 3 * Nx,3 * Ny)
+                                                                                nodes[m_volumes[From_3D_to_1D(cont, cont2, cont3,Nx, Ny)]] = 
+                                                                                    From_3D_to_1D(c1 + 1, c2 - 1,c3 - 1, 3 * Nx,3 * Ny)
                                                                             else
                                                                                 if (is_f1 == 1 && is_f4 == 1 && is_f6 == 1 && is_f2 == 0 && is_f3 == 0 && is_f5 == 0)
-                                                                                    nodes[m_volumes[From_3D_to_1D(cont, cont2,cont3, Nx, Ny)+1]] = From_3D_to_1D((c1 + 1) + 1, (c2 + 1) - 1,(c3 + 1) + 1, 3 * Nx,3 * Ny)
+                                                                                    nodes[m_volumes[From_3D_to_1D(cont, cont2,cont3, Nx, Ny)]] = 
+                                                                                        From_3D_to_1D(c1 + 1, c2 - 1,c3 + 1, 3 * Nx,3 * Ny)
                                                                                 else
                                                                                     if (is_f2 == 1 && is_f3 == 1 && is_f1 == 0 && is_f4 == 0 && is_f5 == 0 && is_f6 == 0)
-                                                                                        nodes[m_volumes[From_3D_to_1D(cont, cont2,cont3, Nx,Ny)+1]] = From_3D_to_1D((c1 + 1) - 1,(c2 + 1) + 1,(c3 + 1),3 * Nx,3 * Ny)
+                                                                                        nodes[m_volumes[From_3D_to_1D(cont, cont2,cont3, Nx,Ny)]] = 
+                                                                                            From_3D_to_1D(c1 - 1,c2 + 1,c3,3 * Nx,3 * Ny)
                                                                                     else
                                                                                         if (is_f2 == 1 && is_f4 == 1 && is_f1 == 0 && is_f3 == 0 && is_f5 == 0 && is_f6 == 0)
-                                                                                            nodes[m_volumes[From_3D_to_1D(cont,cont2,cont3, Nx,Ny)+1]] = From_3D_to_1D((c1 + 1) + 1,(c2 + 1) + 1,(c3 + 1),3 * Nx,3 * Ny)
+                                                                                            nodes[m_volumes[From_3D_to_1D(cont,cont2,cont3, Nx,Ny)]] = 
+                                                                                                From_3D_to_1D(c1 + 1,c2 + 1,c3,3 * Nx,3 * Ny)
                                                                                         else
                                                                                             if (is_f2 == 1 && is_f5 == 1 && is_f1 == 0 && is_f3 == 0 && is_f4 == 0 && is_f6 == 0)
-                                                                                                nodes[m_volumes[From_3D_to_1D(cont,cont2,cont3,Nx,Ny)+1]] = From_3D_to_1D((c1 + 1), (c2 + 1) + 1,(c3 + 1) - 1, 3 * Nx,3 * Ny)
+                                                                                                nodes[m_volumes[From_3D_to_1D(cont,cont2,cont3,Nx,Ny)]] = 
+                                                                                                    From_3D_to_1D(c1, c2 + 1,c3 - 1, 3 * Nx,3 * Ny)
                                                                                             else
                                                                                                 if (is_f2 == 1 && is_f6 == 1 && is_f1 == 0 && is_f3 == 0 && is_f4 == 0 && is_f5 == 0)
-                                                                                                    nodes[m_volumes[From_3D_to_1D(cont, cont2,cont3, Nx,Ny)+1]] = From_3D_to_1D((c1 + 1), (c2 + 1) + 1,(c3 + 1) + 1,3 * Nx,3 * Ny)
+                                                                                                    nodes[m_volumes[From_3D_to_1D(cont, cont2,cont3, Nx,Ny)]] = 
+                                                                                                        From_3D_to_1D(c1, c2 + 1,c3 + 1,3 * Nx,3 * Ny)
                                                                                                 else
                                                                                                     if (is_f2 == 1 && is_f3 == 1 && is_f5 == 1 && is_f1 == 0 && is_f4 == 0 && is_f6 == 0)
-                                                                                                        nodes[m_volumes[From_3D_to_1D(cont,cont2,cont3,Nx,Ny)+1]] = From_3D_to_1D((c1 + 1) - 1,(c2 + 1) + 1,(c3 + 1) - 1,3 * Nx,3 * Ny)
+                                                                                                        nodes[m_volumes[From_3D_to_1D(cont,cont2,cont3,Nx,Ny)]] = 
+                                                                                                            From_3D_to_1D(c1 - 1,c2 + 1,c3 - 1,3 * Nx,3 * Ny)
                                                                                                     else
                                                                                                         if (is_f2 == 1 && is_f3 == 1 && is_f6 == 1 && is_f1 == 0 && is_f4 == 0 && is_f5 == 0)
-                                                                                                            nodes[m_volumes[From_3D_to_1D(cont,cont2,cont3,Nx,Ny)+1]] = From_3D_to_1D((c1 + 1) - 1,(c2 + 1) + 1,(c3 + 1) + 1, 3 * Nx, 3 * Ny)
+                                                                                                            nodes[m_volumes[From_3D_to_1D(cont,cont2,cont3,Nx,Ny)]] = 
+                                                                                                                From_3D_to_1D(c1 - 1,c2 + 1,c3 + 1, 3 * Nx, 3 * Ny)
                                                                                                         else
                                                                                                             if (is_f2 == 1 && is_f4 == 1 && is_f5 == 1 && is_f1 == 0 && is_f3 == 0 && is_f6 == 0)
-                                                                                                                nodes[m_volumes[From_3D_to_1D(cont,cont2,cont3,Nx,Ny)+1]] = From_3D_to_1D((c1 + 1) + 1,(c2 + 1) + 1,(c3 + 1) - 1,3 * Nx,3 * Ny)
+                                                                                                                nodes[m_volumes[From_3D_to_1D(cont,cont2,cont3,Nx,Ny)]] = 
+                                                                                                                    From_3D_to_1D(c1 + 1,c2 + 1,c3 - 1,3 * Nx,3 * Ny)
                                                                                                             else
                                                                                                                 if (is_f2 == 1 && is_f4 == 1 && is_f6 == 1 && is_f1 == 0 && is_f3 == 0 && is_f5 == 0)
-                                                                                                                    nodes[m_volumes[From_3D_to_1D( cont,cont2,cont3,Nx, Ny)+1]] = From_3D_to_1D((c1 + 1) + 1,(c2 + 1) + 1,(c3 + 1) + 1,3 * Nx, 3 * Ny)
+                                                                                                                    nodes[m_volumes[From_3D_to_1D( cont,cont2,cont3,Nx, Ny)]] = 
+                                                                                                                        From_3D_to_1D(c1 + 1,c2 + 1,c3 + 1,3 * Nx, 3 * Ny)
                                                                                                                 else
                                                                                                                     if (is_f3 == 1 && is_f5 == 1 && is_f1 == 0 && is_f2 == 0 && is_f4 == 0 && is_f6 == 0)
-                                                                                                                        nodes[m_volumes[From_3D_to_1D(cont,cont2,cont3,Nx,Ny)+1]] = From_3D_to_1D((c1 + 1) - 1,(c2 + 1) ,(c3 + 1) - 1,3 * Nx,3 * Ny)
+                                                                                                                        nodes[m_volumes[From_3D_to_1D(cont,cont2,cont3,Nx,Ny)]] = 
+                                                                                                                            From_3D_to_1D(c1 - 1,c2 ,c3 - 1,3 * Nx,3 * Ny)
                                                                                                                     else
                                                                                                                         if (is_f3 == 1 && is_f6 == 1 && is_f1 == 0 && is_f2 == 0 && is_f4 == 0 && is_f5 == 0)
-                                                                                                                            nodes[m_volumes[From_3D_to_1D(cont,cont2,cont3,Nx,Ny)+1]] = From_3D_to_1D((c1 + 1) - 1,(c2 + 1), (c3 + 1) + 1,3 * Nx,3 * Ny)
+                                                                                                                            nodes[m_volumes[From_3D_to_1D(cont,cont2,cont3,Nx,Ny)]] = 
+                                                                                                                                From_3D_to_1D(c1 - 1,c2, c3 + 1,3 * Nx,3 * Ny)
                                                                                                                         else
                                                                                                                             if (is_f4 == 1 && is_f5 == 1 && is_f1 == 0 && is_f2 == 0 && is_f3 == 0 && is_f6 == 0)
-                                                                                                                                nodes[m_volumes[From_3D_to_1D(cont,cont2,cont3,Nx,Ny)+1]] = From_3D_to_1D((c1 + 1) + 1,(c2 + 1),(c3 + 1) - 1,3 * Nx,3 * Ny)
+                                                                                                                                nodes[m_volumes[From_3D_to_1D(cont,cont2,cont3,Nx,Ny)]] = 
+                                                                                                                                    From_3D_to_1D(c1 + 1,c2,c3 - 1,3 * Nx,3 * Ny)
                                                                                                                             else
                                                                                                                                 if (is_f4 == 1 && is_f6 == 1 && is_f1 == 0 && is_f2 == 0 && is_f3 == 0 && is_f5 == 0)
-                                                                                                                                    nodes[m_volumes[ From_3D_to_1D(cont,cont2,cont3,Nx,Ny)+1]] = From_3D_to_1D((c1 + 1) + 1,(c2 + 1),(c3 + 1) + 1,3 * Nx,3 * Ny)
+                                                                                                                                    nodes[m_volumes[ From_3D_to_1D(cont,cont2,cont3,Nx,Ny)]] = 
+                                                                                                                                    From_3D_to_1D(c1 + 1,c2,c3 + 1,3 * Nx,3 * Ny)
                                                                                                                                 end
                                                                                                                             end
                                                                                                                         end
@@ -210,7 +237,7 @@ function create_nodes_ref(matrice, Nx,Ny,Nz, num_centri, external_g, m_volumes)
                                 end
                             end
                         else
-                            nodes[m_volumes[From_3D_to_1D( cont,cont2,cont3,Nx, Ny)+1]] = From_3D_to_1D((c1 + 1),(c2 + 1),(c3 + 1),3 * Nx, 3 * Ny)
+                            nodes[m_volumes[From_3D_to_1D( cont,cont2,cont3,Nx, Ny)]] = From_3D_to_1D(c1,c2,c3,3 * Nx, 3 * Ny)
                         end
                         break
                     end
@@ -220,6 +247,7 @@ function create_nodes_ref(matrice, Nx,Ny,Nz, num_centri, external_g, m_volumes)
     end
             
     nodes_red = sort(unique(nodes))
+
     return nodes_red,nodes
 end
 
@@ -263,7 +291,6 @@ function find_nodes_port(nodi_centri, port_start, port_end, nodi, nodi_red)
     N = size(port_start)[1]
     port_voxels = zeros(Int64, N, 2)
     port_nodes = zeros(Int64, N, 2)
-
 
     for cont in range(1, stop=N)
         port_voxels[cont, 1] = nodes_find_rev(port_start[cont,:], nodi_centri, -1)
@@ -410,7 +437,7 @@ function create_mapping_Ax(matrice,Nx,Ny,Nz)
             for cont in range(1, stop=Nx-1)
                 for k in range(1, stop=num_grids)
                     if ((matrice[k][cont][cont2][cont3]==1) && (matrice[k][cont+1][cont2][cont3]==1))
-                        kkey = From_3D_to_1D(cont, cont2, cont3, Nx - 1, Ny) + 1
+                        kkey = From_3D_to_1D(cont, cont2, cont3, Nx - 1, Ny)
                         if mapping[kkey] == 0
                             mapping[kkey] = num_ele
                             num_ele = num_ele + 1
@@ -438,7 +465,7 @@ function create_mapping_Ay(matrice,Nx,Ny,Nz)
             for cont2 in range(1, stop=Ny - 1)
                 for k in range(1, stop=num_grids)
                     if((matrice[k][cont][cont2][cont3]==1) && (matrice[k][cont][cont2+1][cont3]==1))
-                        kkey = From_3D_to_1D(cont, cont2, cont3, Nx, Ny - 1) + 1
+                        kkey = From_3D_to_1D(cont, cont2, cont3, Nx, Ny - 1)
                         if mapping[kkey] == 0
                            mapping[kkey] = num_ele
                            num_ele = num_ele + 1
@@ -465,7 +492,7 @@ function create_mapping_Az(matrice,Nx,Ny,Nz)
             for cont3 in range(1, stop=Nz - 1)
                 for k in range(1, stop=num_grids)
                     if((matrice[k][cont][cont2][cont3]==1) && (matrice[k][cont][cont2][cont3+1]==1))
-                        kkey = From_3D_to_1D(cont, cont2, cont3, Nx, Ny) + 1
+                        kkey = From_3D_to_1D(cont, cont2, cont3, Nx, Ny)
                         if mapping[kkey] == 0
                            mapping[kkey] = num_ele
                            num_ele = num_ele + 1
@@ -498,10 +525,10 @@ function create_A_mats_volInd(matrice,Nx,Ny,Nz,mapping_Vox,mapAx, NAx, mapAy, NA
                 for k in range(1, stop=num_grids)
                     if ((matrice[k][cont][cont2][cont3] == 1) && (matrice[k][cont+1][cont2][cont3] == 1))
 
-                        pos = mapAx[From_3D_to_1D(cont, cont2, cont3, Nx - 1, Ny) + 1] + 1
+                        pos = mapAx[From_3D_to_1D(cont, cont2, cont3, Nx - 1, Ny)] + 1
                         
                         ind_row[num_ele+1] = pos
-                        ind_col[num_ele+1] = bin_search(nodi[mapping_Vox[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)+1]], nodi_red)
+                        ind_col[num_ele+1] = bin_search(nodi[mapping_Vox[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]], nodi_red)
 
                         bars_Lp_x[pos,1] = min_v[1] + sx * (cont - 1) + sx/2
                         bars_Lp_x[pos,2] = min_v[2] + sy * (cont2 - 1)
@@ -511,7 +538,7 @@ function create_A_mats_volInd(matrice,Nx,Ny,Nz,mapping_Vox,mapAx, NAx, mapAy, NA
                         num_ele = num_ele + 1
 
                         ind_row[num_ele+1] = pos
-                        ind_col[num_ele+1] = bin_search(nodi[mapping_Vox[From_3D_to_1D(cont+1, cont2, cont3, Nx, Ny)+1]], nodi_red)
+                        ind_col[num_ele+1] = bin_search(nodi[mapping_Vox[From_3D_to_1D(cont+1, cont2, cont3, Nx, Ny)]], nodi_red)
                         vals_A[num_ele+1] = 1.0
                         num_ele = num_ele + 1
 
@@ -564,14 +591,14 @@ function create_A_mats_volInd(matrice,Nx,Ny,Nz,mapping_Vox,mapAx, NAx, mapAy, NA
                 for k in range(1, stop=num_grids)
                     if ((matrice[k][cont][cont2][cont3] == 1) && (matrice[k][cont][cont2+1][cont3] == 1))
 
-                        pos = mapAy[From_3D_to_1D(cont, cont2, cont3, Nx, Ny - 1)+1] + 1
+                        pos = mapAy[From_3D_to_1D(cont, cont2, cont3, Nx, Ny - 1)] + 1
 
                         bars_Lp_y[pos,1] = min_v[1] + sx * (cont - 1)
                         bars_Lp_y[pos,2] = min_v[2] + sy * (cont2 - 1) + sy/2
                         bars_Lp_y[pos,3] = min_v[3] + sz * (cont3 - 1)
 
                         ind_row[starter+num_ele+1] = pos+NAx
-                        ind_col[starter+num_ele+1] = bin_search(nodi[mapping_Vox[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)+1]], nodi_red)
+                        ind_col[starter+num_ele+1] = bin_search(nodi[mapping_Vox[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]], nodi_red)
                         vals_A[starter+num_ele+1] = -1.0
                         num_ele = num_ele + 1
 
@@ -580,7 +607,7 @@ function create_A_mats_volInd(matrice,Nx,Ny,Nz,mapping_Vox,mapAx, NAx, mapAy, NA
                         bars_Lp_y[pos,6] = bars_Lp_y[pos,3] + sz
 
                         ind_row[starter+num_ele+1] = pos+NAx
-                        ind_col[starter+num_ele+1] = bin_search(nodi[mapping_Vox[From_3D_to_1D(cont, cont2+1, cont3, Nx, Ny)+1]], nodi_red)
+                        ind_col[starter+num_ele+1] = bin_search(nodi[mapping_Vox[From_3D_to_1D(cont, cont2+1, cont3, Nx, Ny)]], nodi_red)
                         vals_A[starter+num_ele+1] = 1.0
                         num_ele = num_ele + 1
 
@@ -629,14 +656,14 @@ function create_A_mats_volInd(matrice,Nx,Ny,Nz,mapping_Vox,mapAx, NAx, mapAy, NA
                 for k in range(1, stop=num_grids)
                     if ((matrice[k][cont][cont2][cont3] == 1) && (matrice[k][cont][cont2][cont3+1] == 1))
 
-                        pos = mapAz[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)+1] + 1
+                        pos = mapAz[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)] + 1
 
                         bars_Lp_z[pos,1] = min_v[1] + sx * (cont - 1)
                         bars_Lp_z[pos,2] = min_v[2] + sy * (cont2 - 1)
                         bars_Lp_z[pos,3] = min_v[3] + sz * (cont3 - 1) + sz/2
 
                         ind_row[starter+num_ele+1] = pos+NAx+NAy
-                        ind_col[starter+num_ele+1] = bin_search(nodi[mapping_Vox[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)+1]], nodi_red)
+                        ind_col[starter+num_ele+1] = bin_search(nodi[mapping_Vox[From_3D_to_1D(cont, cont2, cont3, Nx, Ny)]], nodi_red)
                         vals_A[starter+num_ele+1] = -1.0
                         num_ele = num_ele + 1
 
@@ -645,7 +672,7 @@ function create_A_mats_volInd(matrice,Nx,Ny,Nz,mapping_Vox,mapAx, NAx, mapAy, NA
                         bars_Lp_z[pos,6] = bars_Lp_z[pos,3] + sz
 
                         ind_row[starter+num_ele+1] = pos+NAx+NAy
-                        ind_col[starter+num_ele+1] = bin_search(nodi[mapping_Vox[From_3D_to_1D(cont, cont2, cont3+1, Nx, Ny)+1]], nodi_red)
+                        ind_col[starter+num_ele+1] = bin_search(nodi[mapping_Vox[From_3D_to_1D(cont, cont2, cont3+1, Nx, Ny)]], nodi_red)
                         vals_A[starter+num_ele+1] = 1.0
                         num_ele = num_ele + 1
 
@@ -858,7 +885,7 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
             for k in range(1, stop=num_grids)
                 if ((matrice[k][cont][cont2][cont3]==1) && (ext_grids[k,2,cont,cont2,cont3]==0))
                     num_ele_1 = num_ele_1 + 1
-                    p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny) + 1
+                    p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny)
                     mapping_surf_1[p31] = num_ele_1
                     contat_tot = contat_tot + 1
                     ind_r[contat_tot] = bin_search(nodi[map_volumes[p31]], nodi_red)
@@ -879,7 +906,7 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
                 for k in range(1, stop=num_grids)
                     if ((matrice[k][cont][cont2][cont3]==1) && (matrice[k][cont][cont2-1][cont3]==0) && (ext_grids[k,2,cont,cont2,cont3]==0))
                         num_ele_1 = num_ele_1 + 1
-                        p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny) + 1
+                        p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny)
                         mapping_surf_1[p31] = num_ele_1
                         contat_tot = contat_tot + 1
                         ind_r[contat_tot] = bin_search(nodi[map_volumes[p31]], nodi_red)
@@ -901,7 +928,7 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
             for k in range(1, stop=num_grids)
                 if ((matrice[k][cont][cont2][cont3] == 1) && (ext_grids[k,1,cont,cont2,cont3] == 0))
                     num_ele_2 = num_ele_2 + 1
-                    p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny) + 1
+                    p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny)
                     mapping_surf_2[p31] = num_ele_2
                     contat_tot = contat_tot + 1
                     ind_r[contat_tot] = bin_search(nodi[map_volumes[p31]], nodi_red)
@@ -924,7 +951,7 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
                         check_others = false
                         for k2 in range(1, stop=num_grids)
                             if k!=k2
-                                if (matrice[k2,cont, cont2+1, cont3]==1)
+                                if (matrice[k2][cont][cont2+1][cont3]==1)
                                     check_others = true
                                     break
                                 end
@@ -933,7 +960,7 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
 
                         if (check_others == false)
                             num_ele_2 = num_ele_2 + 1
-                            p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny) + 1
+                            p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny)
                             mapping_surf_2[p31] = num_ele_2
                             contat_tot = contat_tot + 1
                             ind_r[contat_tot] = bin_search(nodi[map_volumes[p31]], nodi_red)
@@ -957,7 +984,7 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
             for k in range(1, stop=num_grids)
                 if ((matrice[k][cont][cont2][cont3] == 1) && (ext_grids[k,4,cont,cont2,cont3] == 0))
                     num_ele_3 = num_ele_3 + 1
-                    p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny) + 1
+                    p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny)
                     mapping_surf_3[p31] = num_ele_3
                     contat_tot = contat_tot + 1
                     ind_r[contat_tot] = bin_search(nodi[map_volumes[p31]], nodi_red)
@@ -978,7 +1005,7 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
                 for k in range(1, stop=num_grids)
                     if ((matrice[k][cont][cont2][cont3]==1) && (matrice[k][cont-1][cont2][cont3]==0) && (ext_grids[k,4,cont,cont2,cont3]==0))
                         num_ele_3 = num_ele_3 + 1
-                        p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny) + 1
+                        p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny)
                         mapping_surf_3[p31] = num_ele_3
                         contat_tot = contat_tot + 1
                         ind_r[contat_tot] = bin_search(nodi[map_volumes[p31]], nodi_red)
@@ -1000,7 +1027,7 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
             for k in range(1, stop=num_grids)
                 if ((matrice[k][cont][cont2][cont3] == 1) && (ext_grids[k,3,cont,cont2,cont3] == 0))
                     num_ele_4 = num_ele_4 + 1
-                    p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny) + 1
+                    p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny)
                     mapping_surf_4[p31] = num_ele_4
                     contat_tot = contat_tot + 1
                     ind_r[contat_tot] = bin_search(nodi[map_volumes[p31]], nodi_red)
@@ -1023,7 +1050,7 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
                         check_others = false
                         for k2 in range(1, stop=num_grids)
                             if k!=k2
-                                if (matrice[k2,cont+1, cont2, cont3]==1)
+                                if (matrice[k2][cont+1][cont2][cont3]==1)
                                     check_others = true
                                     break
                                 end
@@ -1032,7 +1059,7 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
 
                         if (check_others == false)
                             num_ele_4 = num_ele_4 + 1
-                            p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny) + 1
+                            p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny)
                             mapping_surf_4[p31] = num_ele_4
                             contat_tot = contat_tot + 1
                             ind_r[contat_tot] = bin_search(nodi[map_volumes[p31]], nodi_red)
@@ -1057,7 +1084,7 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
             for k in range(1, stop=num_grids)
                 if ((matrice[k][cont][cont2][cont3] == 1) && (ext_grids[k,6,cont,cont2,cont3] == 0))
                     num_ele_5 = num_ele_5 + 1
-                    p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny) + 1
+                    p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny)
                     mapping_surf_5[p31] = num_ele_5
                     contat_tot = contat_tot + 1
                     ind_r[contat_tot] = bin_search(nodi[map_volumes[p31]], nodi_red)
@@ -1078,7 +1105,7 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
                 for k in range(1, stop=num_grids)
                     if ((matrice[k][cont][cont2][cont3]==1) && (matrice[k][cont][cont2][cont3-1]==0) && (ext_grids[k,6,cont,cont2,cont3]==0))
                         num_ele_5 = num_ele_5 + 1
-                        p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny) + 1
+                        p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny)
                         mapping_surf_5[p31] = num_ele_5
                         contat_tot = contat_tot + 1
                         ind_r[contat_tot] = bin_search(nodi[map_volumes[p31]], nodi_red)
@@ -1100,7 +1127,7 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
             for k in range(1, stop=num_grids)
                 if ((matrice[k][cont][cont2][cont3] == 1) && (ext_grids[k,5,cont,cont2,cont3] == 0))
                     num_ele_6 = num_ele_6 + 1
-                    p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny) + 1
+                    p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny)
                     mapping_surf_6[p31] = num_ele_6
                     contat_tot = contat_tot + 1
                     ind_r[contat_tot] = bin_search(nodi[map_volumes[p31]], nodi_red)
@@ -1123,7 +1150,7 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
                         check_others = false
                         for k2 in range(1, stop=num_grids)
                             if k!=k2
-                                if (matrice[k2,cont, cont2, cont3+1]==1)
+                                if (matrice[k2][cont][cont2][cont3+1]==1)
                                     check_others = true
                                     break
                                 end
@@ -1132,7 +1159,7 @@ function create_Gamma_and_center_sup(matrice, Nx,Ny,Nz, map_volumes, min_v, sx, 
 
                         if (check_others==false)
                             num_ele_6 = num_ele_6 + 1
-                            p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny) + 1
+                            p31 = From_3D_to_1D(cont, cont2, cont3, Nx, Ny)
                             mapping_surf_6[p31] = num_ele_6
                             contat_tot = contat_tot + 1
                             ind_r[contat_tot] = bin_search(nodi[map_volumes[p31]], nodi_red)
