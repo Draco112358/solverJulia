@@ -284,16 +284,21 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams)
     Ny = Int64(mesherDict["n_cells"]["n_cells_y"])
     Nz = Int64(mesherDict["n_cells"]["n_cells_z"])
 
-
     testarray = []
     for (index, value) in mesherDict["mesher_matrices"]
         push!(testarray, copy(value))
     end
 
+
     grids = []
 
-    for i in testarray
-        grids = unsqueeze([i], dims=2)
+    for values in testarray
+        if (length(testarray) == 1)
+            println("length ",length(testarray))
+            grids = unsqueeze([values], dims=2)
+        else
+            push!(grids, unsqueeze(values, dims=2))
+        end
     end
 
 
