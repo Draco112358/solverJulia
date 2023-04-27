@@ -328,9 +328,8 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams)
     
     # # END SETTINGS----------------------------------------------
 
-    A, Gamma, ports, lumped_elements, sup_centers, sup_type, bars_Lp_x, bars_Lp_y, bars_Lp_z, diag_R, diag_Cd = generate_interconnection_matrices_and_centers(sx, sy, sz,
-                                                                                                                                                            grids, Nx, Ny, Nz,                                                                                                                                                      MATERIALS, PORTS, L_ELEMENTS,
-                                                                                                                                                            origin)  
+    A, Gamma, ports, lumped_elements, sup_centers, sup_type, bars_Lp_x, bars_Lp_y, bars_Lp_z, diag_R, diag_Cd = generate_interconnection_matrices_and_centers(
+        sx,sy,sz,grids,Nx,Ny,Nz,MATERIALS,PORTS,L_ELEMENTS,origin)  
 
     println("Time for P")
     P_mat = @time compute_P_matrix(sup_centers,sup_type,sx,sy,sz)
