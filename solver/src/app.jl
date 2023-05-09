@@ -1,4 +1,4 @@
-using Genie, Genie.Renderer, Genie.Renderer.Html, Genie.Renderer.Json, Genie.Requests
+using Genie, Genie.Renderer, Genie.Renderer.Html, Genie.Renderer.Json, Genie.Requests, SimpleWebsockets
 
 include("solve.jl")
 
@@ -13,8 +13,16 @@ route("/") do
   html("Hello World")
 end
 
-route("/solving" ,method="POST") do 
-  return JSON.json(doSolving(jsonpayload()["mesherOutput"], jsonpayload()["solverInput"], jsonpayload()["solverAlgoParams"]))
+
+server = WebsocketServer()
+
+@async serve(server; verbose = true)
+
+listen(server, :client) do client 
+  route("/solving" ,method="POST") do 
+      return JSON.json(doSolving(jsonpayload()["mesherOutput"], jsonpayload()["solverInput"], jsonpayload()["solverAlgoParams"], client))
+  end
 end
 
-up(8001, async = false)
+
+up(8001)
