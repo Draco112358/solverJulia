@@ -21,26 +21,32 @@ function dump_json_data(matrix_Z,matrix_S,matrix_Y, num_ports)
     matrix_Z = convert(Array{ComplexF64, 3}, matrix_Z)
     matrix_S = convert(Array{ComplexF64, 3}, matrix_S)
     matrix_Y = convert(Array{ComplexF64, 3}, matrix_Y)
-    
+
     for i in range(1,num_ports)
-        elements = map(v -> reinterpret(Float64, [v]), matrix_Z[1,i,:])
-        push!(z, [elements])
+        for j in range(1, num_ports)
+            elements = map(v -> reinterpret(Float64, [v]), matrix_Z[i,j,:])
+            push!(z, [elements])
+        end
     end
 
     s = [[[[0.1, 0.0]]]]
     pop!(s)
     
     for i in range(1,num_ports)
-        elements = map(v -> reinterpret(Float64, [v]), matrix_S[1,i,:])
-        push!(s, [elements])
+        for j in range(1, num_ports)
+            elements = map(v -> reinterpret(Float64, [v]), matrix_S[i,j,:])
+            push!(s, [elements])
+        end
     end
 
     y = [[[[0.1, 0.0]]]]
     pop!(y)
     
     for i in range(1,num_ports)
-        elements = map(v -> reinterpret(Float64, [v]), matrix_Y[1,i,:])
-        push!(y, [elements])
+        for j in range(1, num_ports)
+            elements = map(v -> reinterpret(Float64, [v]), matrix_Y[i,j,:])
+            push!(y, [elements])
+        end
     end
 
     solver_matrices_dict = Dict(
@@ -143,7 +149,7 @@ mutable struct le_def
 end
                 
 
-function read_ports(inputData::Dict)
+function read_ports(inputData::Dict, escal)
     @assert inputData isa Dict
     ports = inputData["ports"]
     port_objects = [el for el in ports]
@@ -154,15 +160,15 @@ function read_ports(inputData::Dict)
     for port_object in port_objects
         @assert length(port_object.inputElement.transformationParams.position)==3
         ipos = zeros((1,3))
-        ipos[1, 1] = port_object.inputElement.transformationParams.position[1]*1e-3
-        ipos[1, 2] = port_object.inputElement.transformationParams.position[2]*1e-3
-        ipos[1, 3] = port_object.inputElement.transformationParams.position[3]*1e-3
+        ipos[1, 1] = port_object.inputElement.transformationParams.position[1]*escal
+        ipos[1, 2] = port_object.inputElement.transformationParams.position[2]*escal
+        ipos[1, 3] = port_object.inputElement.transformationParams.position[3]*escal
         push!(input_positions, ipos)
         @assert length(port_object.outputElement.transformationParams.position)==3
         opos = zeros((1, 3))
-        opos[1, 1] = port_object.outputElement.transformationParams.position[1]*1e-3
-        opos[1, 2] = port_object.outputElement.transformationParams.position[2]*1e-3
-        opos[1, 3] = port_object.outputElement.transformationParams.position[3]*1e-3
+        opos[1, 1] = port_object.outputElement.transformationParams.position[1]*escal
+        opos[1, 2] = port_object.outputElement.transformationParams.position[2]*escal
+        opos[1, 3] = port_object.outputElement.transformationParams.position[3]*escal
         push!(output_positions, opos)
     end
     @assert length(input_positions)==N_PORTS && length(output_positions)==N_PORTS
@@ -180,7 +186,7 @@ function read_ports(inputData::Dict)
 end
 
 
-function read_lumped_elements(inputData::Dict)
+function read_lumped_elements(inputData::Dict, escal)
     
     @assert inputData isa Dict
     
@@ -199,15 +205,15 @@ function read_lumped_elements(inputData::Dict)
         for lumped_element_object in lumped_elements_objects
             @assert length(lumped_element_object.inputElement.transformationParams.position)==3
             ipos = zeros((1,3))
-            ipos[1, 1] = lumped_element_object.inputElement.transformationParams.position[1]*1e-3
-            ipos[1, 2] = lumped_element_object.inputElement.transformationParams.position[2]*1e-3
-            ipos[1, 3] = lumped_element_object.inputElement.transformationParams.position[3]*1e-3
+            ipos[1, 1] = lumped_element_object.inputElement.transformationParams.position[1]*escal
+            ipos[1, 2] = lumped_element_object.inputElement.transformationParams.position[2]*escal
+            ipos[1, 3] = lumped_element_object.inputElement.transformationParams.position[3]*escal
             push!(input_positions, ipos)
             @assert length(lumped_element_object.outputElement.transformationParams.position)==3
             opos = zeros((1, 3))
-            opos[1, 1] = lumped_element_object.outputElement.transformationParams.position[1]*1e-3
-            opos[1, 2] = lumped_element_object.outputElement.transformationParams.position[2]*1e-3
-            opos[1, 3] = lumped_element_object.outputElement.transformationParams.position[3]*1e-3
+            opos[1, 1] = lumped_element_object.outputElement.transformationParams.position[1]*escal
+            opos[1, 2] = lumped_element_object.outputElement.transformationParams.position[2]*escal
+            opos[1, 3] = lumped_element_object.outputElement.transformationParams.position[3]*escal
             push!(output_positions, opos)            
             lvalue = zeros(1)
             lvalue[1] = lumped_element_object.value
@@ -266,13 +272,36 @@ struct GMRES_set
     tol
 end
 
+function getEscalFrom(unit)
+    escal = 1
+    if (unit == "m")
+        escal = 1
+    end
+    if (unit == "cm")
+        escal = 1e-2
+    end
+    if (unit == "mm")
+        escal = 1e-3
+    end
+    if (unit == "microm")
+        escal = 1e-6
+    end
+    if (unit == "nanom")
+        escal = 1e-9
+    end
+    return escal
+end
+
     
 function doSolving(mesherOutput, solverInput, solverAlgoParams, client)    
 
     inputDict = Dict(solverInput)
     mesherDict = Dict(mesherOutput)
+    unit = solverInput["unit"]
+    escal = getEscalFrom(unit)
     
-    sx, sy, sz = mesherDict["cell_size"]["cell_size_x"],mesherDict["cell_size"]["cell_size_y"],mesherDict["cell_size"]["cell_size_z"]
+    
+    sx, sy, sz = mesherDict["cell_size"]["cell_size_x"]*1000*escal,mesherDict["cell_size"]["cell_size_y"]*1000*escal,mesherDict["cell_size"]["cell_size_z"]*1000*escal
     num_input_files = mesherDict["n_materials"]
     
 
@@ -295,7 +324,6 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams, client)
 
     for values in testarray
         if (length(testarray) == 1)
-            println("length ",length(testarray))
             grids = unsqueeze([values], dims=2)
         else
             push!(grids, unsqueeze(values, dims=2))
@@ -307,14 +335,10 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams, client)
     
     n_freq = length(frequencies)
     
-    PORTS = read_ports(inputDict)
-    
-    println(length(inputDict["ports"]))
+    PORTS = read_ports(inputDict, escal)
 
-    L_ELEMENTS = read_lumped_elements(inputDict)
+    L_ELEMENTS = read_lumped_elements(inputDict, escal)
 
-
-    
     MATERIALS = read_materials(inputDict) 
     SIGNALS = read_signals(inputDict)
     
