@@ -15,8 +15,7 @@ end
 
 
 server = WebsocketServer()
-
-@async serve(server; verbose = true)
+@async serve(server, 8080, "127.0.0.1")
 
 listen(server, :client) do client 
   route("/solving" ,method="POST") do 

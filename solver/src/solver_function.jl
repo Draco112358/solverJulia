@@ -2,6 +2,7 @@ using SuperLU, SparseArrays
 using LinearAlgebra
 using IterativeSolvers
 using LinearMaps
+using DelimitedFiles
 #using Krylov
 #using KrylovMethods
 
@@ -693,18 +694,39 @@ function Quasi_static_iterative_solver(freq_in,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,L
     diag_Cd=escalings.Cd * diag_Cd
 
     #display(diag_R)
+    # solver_input = Dict(
+    #     "A" => A,
+    #     "Gamma" => Gamma,
+    #     "P" => P_mat,
+    #     "Lp_x" => Lp_x_mat,
+    #     "Lp_y" => Lp_y_mat,
+    #     "Lp_z" => Lp_z_mat,
+    #     "Z_self" => [],
+    #     "Yle" => [],
+    #     "invZ" => [],
+    #     "invP" => invP,
+    #     "lu" => [],
+    #     "tn" => []
+    # )
+     
 
     for k in range(1, stop=nfreq)
         println("Freq n=", k, " - Freq Tot=", nfreq)
         send(client, k)
         Z_self = compute_Z_self(diag_R,diag_Cd, w[k])
+        #push!(solver_input["Z_self"], Z_self)
+        
         # println("lumped_elements -> ", lumped_elements)
         # println("ports -> ", ports)
         # println("escalings -> ", escalings)
         # println("w[k] / escalings.freq -> ", w[k] / escalings.freq)
         # println("val_chiusura -> ", val_chiusura)
         Yle = build_Yle_S(lumped_elements, ports, escalings, n, w[k] / escalings.freq, val_chiusura)
+        #push!(solver_input["Yle"], Yle)
+        
         invZ = sparse(range(1, stop=m), range(1, stop=m), (1. ./ (Z_self[:,1] .+ (1im * w[k] * diag_Lp))),m,m)
+        #push!(solver_input["invZ"], invZ)
+        
         #println(Yle) yle non coincide
         #println(size((*(transpose(A),*(invZ,A))+1im*w[k]*(*(Gamma,*(invP,transpose(Gamma)))))))
         SS = Yle+(prod_real_complex(transpose(A),prod_complex_real(invZ,A))+1im*w[k]*(*(Gamma,*(invP,transpose(Gamma)))))
@@ -712,6 +734,7 @@ function Quasi_static_iterative_solver(freq_in,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,L
 
         # println("tempo lu")
         F=splu(SS)
+        #push!(solver_input["lu"], F)
         
         #println(F.Pr * SS * F.Pc == F.L * F.U)
 
@@ -724,6 +747,7 @@ function Quasi_static_iterative_solver(freq_in,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,L
             Is[n2] = -1.0 * escalings.Is
 
             tn = precond_3_3_Kt(F, invZ, invP, A,Gamma, m, ns, Is)
+            #push!(solver_input["tn"], tn)
 
             #counter = gmres_counter()
 
@@ -797,5 +821,7 @@ function Quasi_static_iterative_solver(freq_in,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,L
     end
     Z=s2z(S,val_chiusura)
     Y=s2y(S,val_chiusura)
+    println(length(solver_input["tn"]))
+    #writedlm("/tmp/inputSolver1.txt", solver_input)
     return Z,Y,S
 end

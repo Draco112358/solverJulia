@@ -378,6 +378,20 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams, client)
     send(client, "LPz Computing Completed")
     
 
+    solver_input = Dict(
+        "frequencies" => frequencies,
+        "A" => collect(A),
+        "Gamma" => collect(Gamma),
+        "P" => P_mat,
+        "Lp_x" => Lp_x_mat,
+        "Lp_y" => Lp_y_mat,
+        "Lp_z" => Lp_z_mat,
+        "diag_R" => diag_R,
+        "diag_Cd" => diag_Cd,
+        "ports" => ports,
+        "lumped_elements" => lumped_elements
+    )
+    writedlm("/tmp/inputSolver.txt", solver_input)
 
     println("Time for solver algo")
     Z, Y, S = @time Quasi_static_iterative_solver(frequencies,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,Lp_z_mat,diag_R,diag_Cd,ports,lumped_elements,GMRES_settings, client)
