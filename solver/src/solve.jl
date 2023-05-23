@@ -378,20 +378,29 @@ function doSolving(mesherOutput, solverInput, solverAlgoParams, client)
     send(client, "LPz Computing Completed")
     
 
-    solver_input = Dict(
-        "frequencies" => frequencies,
-        "A" => collect(A),
-        "Gamma" => collect(Gamma),
-        "P" => P_mat,
-        "Lp_x" => Lp_x_mat,
-        "Lp_y" => Lp_y_mat,
-        "Lp_z" => Lp_z_mat,
-        "diag_R" => diag_R,
-        "diag_Cd" => diag_Cd,
-        "ports" => ports,
-        "lumped_elements" => lumped_elements
-    )
-    writedlm("/tmp/inputSolver.txt", solver_input)
+    # solver_input = Dict(
+    #     "frequencies" => frequencies,
+    #     "A" => collect(A),
+    #     "Gamma" => collect(Gamma),
+    #     "P" => P_mat,
+    #     "Lp_x" => Lp_x_mat,
+    #     "Lp_y" => Lp_y_mat,
+    #     "Lp_z" => Lp_z_mat,
+    #     "diag_R" => diag_R,
+    #     "diag_Cd" => diag_Cd,
+    #     "ports" => ports,
+    #     "lumped_elements" => lumped_elements
+    # )
+    writedlm("/tmp/frequencies.txt", frequencies)
+    writedlm("/tmp/A.txt", collect(A))
+    writedlm("/tmp/M.txt", collect(Gamma))
+    writedlm("/tmp/Lp_x.txt", Lp_x_mat)
+    writedlm("/tmp/Lp_y.txt", Lp_y_mat)
+    writedlm("/tmp/Lp_z.txt", Lp_z_mat)
+    writedlm("/tmp/P.txt", P_mat)
+    writedlm("/tmp/diag_R.txt", diag_R)
+    writedlm("/tmp/diag_Cd.txt", diag_Cd)
+    
 
     println("Time for solver algo")
     Z, Y, S = @time Quasi_static_iterative_solver(frequencies,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,Lp_z_mat,diag_R,diag_Cd,ports,lumped_elements,GMRES_settings, client)

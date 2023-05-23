@@ -632,8 +632,8 @@ end
 
 function Quasi_static_iterative_solver(freq_in,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,Lp_z_mat,diag_R,diag_Cd,ports,lumped_elements,GMRES_settings, client)
 
-    escalings = escals(1e6, 1e-12, 1e-3, 1e12, 1e3, 1e3, 1e-9)
-    #escalings = escals(1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
+    #escalings = escals(1e6, 1e-12, 1e-3, 1e12, 1e3, 1e3, 1e-9) #mettere tutto a 1 per scrivere il file
+    escalings = escals(1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
 
     freq = freq_in * escalings.freq
     # GMRES settings - ---------------------------
@@ -653,7 +653,8 @@ function Quasi_static_iterative_solver(freq_in,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,L
 
     nfreq = size(w)[1]
 
-    Is = zeros(Float64, n, 1)
+    Is = zeros(Float64, n, 1) #da salvare
+    writedlm("/tmp/Is.txt", Is)
 
     num_ports=size(ports.port_start)[1]
 
@@ -693,22 +694,6 @@ function Quasi_static_iterative_solver(freq_in,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,L
     diag_R=escalings.R*diag_R
     diag_Cd=escalings.Cd * diag_Cd
 
-    #display(diag_R)
-    # solver_input = Dict(
-    #     "A" => A,
-    #     "Gamma" => Gamma,
-    #     "P" => P_mat,
-    #     "Lp_x" => Lp_x_mat,
-    #     "Lp_y" => Lp_y_mat,
-    #     "Lp_z" => Lp_z_mat,
-    #     "Z_self" => [],
-    #     "Yle" => [],
-    #     "invZ" => [],
-    #     "invP" => invP,
-    #     "lu" => [],
-    #     "tn" => []
-    # )
-     
 
     for k in range(1, stop=nfreq)
         println("Freq n=", k, " - Freq Tot=", nfreq)
@@ -722,6 +707,9 @@ function Quasi_static_iterative_solver(freq_in,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,L
         # println("w[k] / escalings.freq -> ", w[k] / escalings.freq)
         # println("val_chiusura -> ", val_chiusura)
         Yle = build_Yle_S(lumped_elements, ports, escalings, n, w[k] / escalings.freq, val_chiusura)
+        if (k == 1)
+            writedlm("/tmp/Yle.txt", Yle)
+        end
         #push!(solver_input["Yle"], Yle)
         
         invZ = sparse(range(1, stop=m), range(1, stop=m), (1. ./ (Z_self[:,1] .+ (1im * w[k] * diag_Lp))),m,m)
@@ -741,7 +729,7 @@ function Quasi_static_iterative_solver(freq_in,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,L
         #LU_S = linalg.spilu(SS, drop_tol=1e-6, options=dict(SymmetricMode=True))
 
         for c1 in range(1, stop=num_ports)
-            n1 = ports.port_nodes[c1, 1]
+            n1 = ports.port_nodes[c1, 1] #da salvare come matrice numero_porte*2
             n2 = ports.port_nodes[c1, 2]
             Is[n1] = 1.0 * escalings.Is
             Is[n2] = -1.0 * escalings.Is
@@ -821,7 +809,6 @@ function Quasi_static_iterative_solver(freq_in,A,Gamma,P_mat,Lp_x_mat,Lp_y_mat,L
     end
     Z=s2z(S,val_chiusura)
     Y=s2y(S,val_chiusura)
-    println(length(solver_input["tn"]))
     #writedlm("/tmp/inputSolver1.txt", solver_input)
     return Z,Y,S
 end
